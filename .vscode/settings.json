@@ -1,0 +1,12 @@
+{
+    "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": true,
+    "editor.formatOnSave": true,
+    "eslint.enable": true,
+    "eslint.autoFixOnSave": true,
+    "files.exclude": {
+        "*.*~": true,
+        "*.ts~": true,
+        "*.un~": true
+    },
+    "typescript.tsdk": "node_modules\\typescript\\lib"
+}

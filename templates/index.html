@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<!-- Demo template -->
+
+<head>
+    <title>Demo</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #target {
+            padding-top: 64px;
+        }
+
+        #main-header {
+            width: 100vw;
+            height: 64px;
+            background-color: black;
+            position: fixed;
+        }
+
+        @media screen and (max-width:980px) {
+            #target {
+                padding-top: 80px;
+            }
+
+            #main-header {
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Demo header -->
+    <div id="main-header"></div>
+
+    <!-- Target div inside of which the app is rendered -->
+    <div id='target'></div>
+    <script src="runner.js" charset="UTF-8"></script>
+    <script>window.addEventListener('load', function () { runner.attach('target') })</script>
+</body>
+
+</html>

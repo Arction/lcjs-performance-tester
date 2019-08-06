@@ -1,0 +1,9 @@
+<script>
+    window.addEventListener('message', h);
+    function h(e) {
+        if (IEFRAME_TARGET) {
+            window.removeEventListener('message', h);
+            document.write(e.data); document.close();
+        }
+    }
+</script>

@@ -1,0 +1,31 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "sourceMap": true,
+        "forceConsistentCasingInFileNames": true,
+        "removeComments": true,
+        "pretty": true,
+        "experimentalDecorators": true,
+        "jsx": "react",
+        "strict": true,
+        "baseUrl": ".",
+        "downlevelIteration": true,
+        "lib": [
+            "es2015.iterable",
+            "es2015",
+            "dom",
+            "es2016.array.include"
+        ],
+        "paths": {
+            "*": [
+                "*",
+                "content/generated/*"
+            ]
+        }
+    },
+    "exclude": [
+        "test"
+    ]
+}

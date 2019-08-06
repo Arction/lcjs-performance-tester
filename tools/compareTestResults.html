@@ -1,0 +1,162 @@
+<html>
+
+<body>
+	<script>
+		function parseCSV(testResultsAsString) {
+			// Take third section (test results) separated by 20x * characters.
+			const csv = testResultsAsString.split('********************')[2]
+			// Split by rows.
+			const rows = csv.split('\n')
+			// Read columns.
+			const firstRow = rows.splice(0, 2)[1] // First row is empty for some reason
+			const columns = firstRow.split(',')
+			// Parse into unique values array (handles repeated tests).
+			const results = new Map()
+			let testErrorCount = 0
+			for (const row of rows)
+				if (row.length > 0) {
+					const split = row.split(',')
+					const id = split[0]
+
+					const formatedFloats = split.slice(1)
+					// Abort if any value is empty string (test error).
+					if (formatedFloats.reduce((prev, value) => prev || value.length == 0, false)) {
+						testErrorCount++
+						continue
+					}
+
+					const result = formatedFloats.map(Number.parseFloat)
+					if (!results.has(id))
+						results.set(id, [result])
+					else
+						results.get(id).push(result)
+				}
+			// Map into Map of json objects with min, max, avg, mean values for each column.
+			const values = new Map()
+			results.forEach((result, key) => {
+				if (result.length > 0) {
+					const keyValues = []
+					// Iterate by columns.
+					for (let i = 0; i < result[0].length; i++) {
+						// Map column values into array.
+						const column = []
+						for (const row of result)
+							column.push(row[i])
+						const columnSorted = column.sort((a, b) => a - b)
+						// Pick min, max, avg, mean values and add as object to 'values'.
+						const len = columnSorted.length
+						const min = columnSorted[0]
+						const max = columnSorted[len - 1]
+						const mean = (len % 2 == 1) ?
+							(columnSorted[Math.floor(len / 2)]) : ((columnSorted[len / 2 - 1] + columnSorted[len / 2]) * .5)
+						const avg = columnSorted.reduce((sum, cur) => sum + cur) / len
+						keyValues.push({ min, max, mean, avg })
+					}
+					values.set(key, keyValues)
+				}
+			})
+			return {
+				columns,
+				values,
+				testErrorCount
+			}
+		}
+		function whiteSpaces(count) {
+			var s = ''
+			while (s.length < count)
+				s += ' '
+			return s
+		}
+		function compareTestResults(
+			data1,
+			data2
+		) {
+			console.log('\nCOMPARE TEST RESULTS\n')
+			var values1 = data1.values
+			var values2 = data2.values
+
+			var deltas = []
+			values1.forEach((value1, id) => {
+				// Check for same id in values2.
+				const value2 = values2.get(id)
+				if (value2) {
+					deltas.push([
+						id,
+						// FPS
+						value2[0].max - value1[0].max,
+						// Load delay
+						value2[1].min - value1[1].min
+					])
+				}
+			})
+
+			// Write deltas on document.
+			var output = ''
+			output += '<pre><span>Compare results</span><br>'
+			output += `<span>${data1.name} (${data1.testErrorCount} errors) vs ${data2.name} (${data2.testErrorCount} errors)</span><br>`
+			output += `<span>ID${whiteSpaces(50 - 2)}FPS (max delta)${whiteSpaces(20 - 15)}LOADUP (min delta)</span><br>`
+			for (let i = 0; i < deltas.length; i++) {
+				var delta = deltas[i]
+
+				var id = delta[0]
+				output += `<span>${id}</span>`
+				output += whiteSpaces(50 - id.length)
+
+				var fps = delta[1]
+				var fpsString = fps.toFixed(1)
+				output += `<span style='${
+					fps > 0 ?
+						'color: #00FF00' :
+						'color: #FF0000'
+					}'>${fpsString}</span>`
+				output += whiteSpaces(20 - fpsString.length)
+
+				var load = delta[2]
+				output += `<span style='${
+					load < 0 ?
+						'color: #00FF00' :
+						'color: #FF0000'
+					}'>${load.toFixed(1)}</span>`
+
+				output += '<br>'
+			}
+			output += '</pre>'
+			document.write(output)
+		}
+
+		var f1
+		var f2
+
+		var createCSVInput = function (onSelect) {
+			var input = document.createElement('input')
+			input.type = 'file'
+			input.addEventListener('change', function (e) {
+				var name = e.target.files[0].name
+				var reader = new FileReader();
+				reader.addEventListener('load', function (e) {
+					onSelect(name, e.target.result)
+				});
+				reader.readAsBinaryString(e.target.files[0])
+			}, false)
+			document.body.appendChild(input)
+		}
+		var check = function () {
+			if (f1 && f2) {
+				compareTestResults(f1, f2)
+			}
+		}
+		createCSVInput(function (name, csv) {
+			f1 = { name, ...parseCSV(csv) }
+			console.log('#1:', name, f1)
+			check()
+		})
+		createCSVInput(function (name, csv) {
+			f2 = { name, ...parseCSV(csv) }
+			console.log('#2:', name, f2)
+			check()
+		})
+
+	</script>
+</body>
+
+</html>

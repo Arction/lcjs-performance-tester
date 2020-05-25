@@ -1130,7 +1130,7 @@ var Dashboard = function (numberOfRows, numberOfColumns, moveSplitters, title) {
                         // The position along splitters where splitters are dragged. (hardcoded with a value that would drag the right splitters)
                         var splitterDragPosition = 15
                         var _simulateMouse = function(type, x, y){
-                            var event = new MouseEvent(type, {
+                            var event = new PointerEvent(type, {
                                 view: window,
                                 bubbles: true,
                                 cancelable: true,
@@ -1176,8 +1176,8 @@ var Dashboard = function (numberOfRows, numberOfColumns, moveSplitters, title) {
                             var splitterPosition = panel.engine.engineLocation2Client(posInEngine.x, posInEngine.y)
                             var targetPosition = { x: splitterPosition.x + _either(vector.x, 0), y: splitterPosition.y + _either(vector.y, 0) }
                             // Simulate mouse move and down.
-                            _simulateMouse('mousemove', splitterPosition.x, splitterPosition.y)
-                            _simulateMouse('mousedown', splitterPosition.x, splitterPosition.y)
+                            _simulateMouse('pointermove', splitterPosition.x, splitterPosition.y)
+                            _simulateMouse('pointerdown', splitterPosition.x, splitterPosition.y)
                             // Set animation for movement.
                             var pos = 0
                             var tPrev = window.performance.now()
@@ -1192,12 +1192,12 @@ var Dashboard = function (numberOfRows, numberOfColumns, moveSplitters, title) {
                                     y: splitterPosition.y + pos * (targetPosition.y - splitterPosition.y)
                                 }
                                 // Move mouse.
-                                _simulateMouse('mousemove', curPosition.x, curPosition.y)
+                                _simulateMouse('pointermove', curPosition.x, curPosition.y)
                                 // Check end of animation.
                                 if (pos >= 1) {
                                     clearInterval(sub)
-                                    _simulateMouse('mouseup', curPosition.x, curPosition.y)
-                                    _simulateMouse('mousemove', 0, 0)
+                                    _simulateMouse('pointerup', curPosition.x, curPosition.y)
+                                    _simulateMouse('pointermove', 0, 0)
                                     for (var i = 0; i < callbacks.length; i++){
                                         callbacks[i]()
                                     }

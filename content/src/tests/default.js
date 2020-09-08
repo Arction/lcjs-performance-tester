@@ -96,7 +96,7 @@ var ScatterSeries = function (pointCount, pointSize, title) {
     return ProtoTestCode(
         `function() {
             var lightningChart = require('lcjs').lightningChart
-            var chart = lightningChart(${ licenseKey ? '\'' + licenseKey + '\'' : undefined})
+            var chart = lightningChart(${licenseKey ? '\'' + licenseKey + '\'' : undefined})
                 .ChartXY()
                 .setTitle('${title}')
                 .setMouseInteractions(false)
@@ -170,7 +170,7 @@ var ScrollingProgressiveLine = function (pointCount, seriesCount, thickness, tit
     return ProtoTestCode(
         `function() {
             var lightningChart = require('lcjs').lightningChart
-            var grid = lightningChart(${ licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard(
+            var grid = lightningChart(${licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard(
                 {
                     numberOfColumns: 1,
                     numberOfRows: ${seriesCount}
@@ -181,7 +181,7 @@ var ScrollingProgressiveLine = function (pointCount, seriesCount, thickness, tit
         GenerateProgressive(pointCount),
         `
         function (data, grid) {
-            var { AxisScrollStrategies, DataPatterns, emptyFill, emptyTick } = require('lcjs')
+            var { AxisScrollStrategies, DataPatterns, emptyFill, emptyTick, AxisTickStrategies } = require('lcjs')
             var series = []
             for (var i = 0; i < ${seriesCount}; i ++) {
                 var chart = grid.createChartXY({
@@ -202,7 +202,7 @@ var ScrollingProgressiveLine = function (pointCount, seriesCount, thickness, tit
                     .setScrollStrategy(undefined)
                     .setMouseInteractions(false)
                 if (i < ${seriesCount - 1})
-                    axisX.setTickStyle(emptyTick)
+                    axisX.setTickStrategy(AxisTickStrategies.Empty)
                 
                 if (i == 0)
                     chart.setTitle('${title}')
@@ -234,7 +234,7 @@ var StaticProgressiveLine = function (pointCount, seriesCount, thickness, title)
     return ProtoTestCode(
         `function() {
             var lightningChart = require('lcjs').lightningChart
-            var grid = lightningChart(${ licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard({
+            var grid = lightningChart(${licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard({
                 numberOfColumns: 1,
                 numberOfRows: ${seriesCount}
             })
@@ -244,7 +244,7 @@ var StaticProgressiveLine = function (pointCount, seriesCount, thickness, title)
         GenerateProgressive(pointCount),
         `
         function (data, grid) {
-            var { DataPatterns, emptyFill, emptyTick } = require('lcjs')
+            var { DataPatterns, emptyFill, emptyTick, AxisTickStrategies } = require('lcjs')
             var series = []
             for (var i = 0; i < ${seriesCount}; i ++) {
                 var chart = grid.createChartXY({
@@ -264,7 +264,7 @@ var StaticProgressiveLine = function (pointCount, seriesCount, thickness, title)
                     .setScrollStrategy(undefined)
                     .setMouseInteractions(false)
                 if (i < ${seriesCount - 1})
-                    axisX.setTickStyle(emptyTick)
+                    axisX.setTickStrategy(AxisTickStrategies.Empty)
                 if (i == 0)
                     chart.setTitle('${title}')
                 else
@@ -319,7 +319,7 @@ var ScrollingPointLine = function (pointCount, seriesCount, title) {
     return ProtoTestCode(
         `function() {
             var lightningChart = require('lcjs').lightningChart
-            var grid = lightningChart(${ licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard({
+            var grid = lightningChart(${licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard({
                 numberOfColumns: 1,
                 numberOfRows: ${seriesCount}
             })
@@ -329,7 +329,7 @@ var ScrollingPointLine = function (pointCount, seriesCount, title) {
         GenerateProgressive(pointCount),
         `
         function (data, grid) {
-            var { AxisScrollStrategies, emptyFill, emptyTick } = require('lcjs')
+            var { AxisScrollStrategies, emptyFill, emptyTick, AxisTickStrategies } = require('lcjs')
             var series = []
             for (var i = 0; i < ${seriesCount}; i ++) {
                 var chart = grid.createChartXY({
@@ -349,7 +349,7 @@ var ScrollingPointLine = function (pointCount, seriesCount, title) {
                     .setScrollStrategy(undefined)
                     .setMouseInteractions(false)
                 if (i < ${seriesCount - 1})
-                    axisX.setTickStyle(emptyTick)
+                    axisX.setTickStrategy(AxisTickStrategies.Empty)
                 
                 if (i == 0)
                     chart.setTitle('${title}')
@@ -380,7 +380,7 @@ var SplineSeries = function (pointCount, seriesCount, title) {
     return ProtoTestCode(
         `function() {
             var lightningChart = require('lcjs').lightningChart
-            var grid = lightningChart(${ licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard({
+            var grid = lightningChart(${licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard({
                 numberOfColumns: 1,
                 numberOfRows: ${seriesCount}
             })
@@ -390,7 +390,7 @@ var SplineSeries = function (pointCount, seriesCount, title) {
         GenerateProgressive(pointCount),
         `
         function (data, grid) {
-            var { AxisScrollStrategies, emptyFill, emptyTick } = require('lcjs')
+            var { AxisScrollStrategies, emptyFill, emptyTick, AxisTickStrategies } = require('lcjs')
             var series = []
             for (var i = 0; i < ${seriesCount}; i ++) {
                 var chart = grid.createChartXY({
@@ -410,7 +410,7 @@ var SplineSeries = function (pointCount, seriesCount, title) {
                     .setScrollStrategy(undefined)
                     .setMouseInteractions(false)
                 if (i < ${seriesCount - 1})
-                    axisX.setTickStyle(emptyTick)
+                    axisX.setTickStrategy(AxisTickStrategies.Empty)
                 
                 if (i == 0)
                     chart.setTitle('${title}')
@@ -443,7 +443,7 @@ var ScrollingProgressiveArea = function (pointCount, seriesCount, title) {
     return ProtoTestCode(
         `function() {
             var lightningChart = require('lcjs').lightningChart
-            var grid = lightningChart(${ licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard({
+            var grid = lightningChart(${licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard({
                 numberOfColumns: 1,
                 numberOfRows: ${seriesCount}
             })
@@ -453,7 +453,7 @@ var ScrollingProgressiveArea = function (pointCount, seriesCount, title) {
         GenerateProgressive(pointCount),
         `
         function (data, grid) {
-            var { AxisScrollStrategies, emptyFill, emptyTick } = require('lcjs')
+            var { AxisScrollStrategies, emptyFill, emptyTick, AxisTickStrategies } = require('lcjs')
             var series = []
             for (var i = 0; i < ${seriesCount}; i ++) {
                 var chart = grid.createChartXY({
@@ -473,7 +473,7 @@ var ScrollingProgressiveArea = function (pointCount, seriesCount, title) {
                     .setScrollStrategy(undefined)
                     .setMouseInteractions(false)
                 if (i < ${seriesCount - 1})
-                    axisX.setTickStyle(emptyTick)
+                    axisX.setTickStrategy(AxisTickStrategies.Empty)
             
                 if (i == 0)
                     chart.setTitle('${title}')
@@ -504,7 +504,7 @@ var OHLCSeries = function (pointCount, generator, ohlcSeriesType, ohlcFigureType
     return ProtoTestCode(
         `function() {
             var lightningChart = require('lcjs').lightningChart
-            var chart = lightningChart(${ licenseKey ? '\'' + licenseKey + '\'' : undefined}).ChartXY()
+            var chart = lightningChart(${licenseKey ? '\'' + licenseKey + '\'' : undefined}).ChartXY()
 
             return chart
         }`,
@@ -556,7 +556,7 @@ var OHLCSeriesFit = function (pointCount, generator, ohlcSeriesType, ohlcFigureT
     return ProtoTestCode(
         `function() {
             var lightningChart = require('lcjs').lightningChart
-            var chart = lightningChart(${ licenseKey ? '\'' + licenseKey + '\'' : undefined}).ChartXY()
+            var chart = lightningChart(${licenseKey ? '\'' + licenseKey + '\'' : undefined}).ChartXY()
 
             return chart
         }`,
@@ -1061,7 +1061,7 @@ var Dashboard = function (numberOfRows, numberOfColumns, moveSplitters, title) {
     return ProtoTestCode(
         `function() {
             var lightningChart = require('lcjs').lightningChart
-            var dashboard = lightningChart(${ licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard({
+            var dashboard = lightningChart(${licenseKey ? '\'' + licenseKey + '\'' : undefined}).Dashboard({
                 numberOfRows: ${numberOfRows},
                 numberOfColumns: ${numberOfColumns}
             })

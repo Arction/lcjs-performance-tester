@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "author": "Arction Ltd.",
-  "license": "MIT",
+  "license": "See license in LICENSE",
   "scripts": {
     "build": "gulp build --prod",
     "build:watch": "gulp buildWatch --prod",

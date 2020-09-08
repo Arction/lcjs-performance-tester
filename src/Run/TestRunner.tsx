@@ -108,7 +108,7 @@ export default class TestRunner extends React.PureComponent<TestRunnerProps, Tes
     componentWillUnmount() {
         window.removeEventListener( 'message', this.testMessageHandler )
     }
-    componentWillReceiveProps() {
+    UNSAFE_componentWillReceiveProps() {
         this.result = {}
     }
     handleError() {

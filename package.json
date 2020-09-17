@@ -18,7 +18,7 @@
     "test:watch": "gulp testWatch"
   },
   "devDependencies": {
-    "@arction/lcjs": "^2.0.1",
+    "@arction/lcjs": "^2.0.2",
     "@arction/xydata": "^1.2.1",
     "@babel/cli": "^7.11.6",
     "@babel/core": "^7.11.6",

@@ -1,6 +1,4 @@
-/**
- * Everything defined in tools.js is usable here.
- */
+// Everything defined in tools.js is usable here.
 
 /**
  * Template factory for progressive Vec2 generation function.

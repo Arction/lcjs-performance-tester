@@ -206,7 +206,7 @@ var locateChart3D = `function() {
 
     var groupsInfo = [
         {
-            defaultSelected: true,
+            defaultSelected: false,
             key: 'surfaceGrid3D',
             label: 'Surface Grid 3D',
             dataResolutions: [
@@ -321,6 +321,122 @@ var locateChart3D = `function() {
                         generateSpectrogramData(dataResolution),
                         initChartCode(false, usePalette),
                         streamSpectrogramData(dataResolution)
+                    )
+                })
+            }
+        }
+    }
+})()
+
+// #endregion
+
+// #region ----- Surface Mesh Series -----
+
+;(function () {
+
+    var groupsInfo = [
+        {
+            defaultSelected: true,
+            key: 'surfaceMesh3D',
+            label: 'Surface Mesh 3D',
+            dataResolutions: [
+                // 50 x 50 = 2500
+                50,
+                // 100 x 100 = 10 000
+                100,
+                // 250 x 250 = 62 500
+                250,
+                // 500 x 500 = 250 000
+                500
+            ]
+        }
+    ]
+
+    var generateSurfaceGeometryData = function (dataResolution) {
+        return `function () {
+            return new Promise(function (resolve, reject) {
+                var data = []
+                var rows = ${dataResolution}
+                var columns = ${dataResolution}
+                var y1 = ( t ) => .3 * Math.sin( t * 4 * Math.PI / columns )
+                var y2 = ( t ) => 2.5 + Math.cos( t * 4 * Math.PI / columns )
+                for (var row = 0; row < rows; row ++) {
+                    data[row] = []
+                    for (var column = 0; column < columns; column ++) {
+                        var angle = row * 2 * Math.PI / ( rows - 1 )
+                        var radius = Math.abs( y2( column ) - y1( column ) )
+                        data[row][column] = {
+                            x: Math.sin( angle ) * radius,
+                            y: Math.cos( angle ) * radius,
+                            z: column
+                        }
+                    }
+                }
+                resolve(data)
+            })
+        }`
+    }
+
+    var initChartCode = function (addDataImmediately, usePalette, dataResolution) {
+        return `function (data, chart) {
+            var { SurfaceSeriesTypes3D, LUT, PalettedFill, SolidFill, ColorRGBA } = require('lcjs')
+
+            chart.getDefaultAxisX().setInterval( -3.55, 3.55, false, true )
+            chart.getDefaultAxisY().setInterval( -3.55, 3.55, false, true )
+            chart.getDefaultAxisZ().setInterval( 0, ${dataResolution}, false, true )
+
+            var lut = new LUT( {
+                steps: [
+                    { value: 0, color: ColorRGBA( 4, 11, 125 ) },
+                    { value: 15, color: ColorRGBA( 4, 11, 125 ) },
+                    { value: 30, color: ColorRGBA( 4, 130, 5 ) },
+                    { value: 60, color: ColorRGBA( 132, 15, 4 ) },
+                    { value: 100, color: ColorRGBA( 255, 255, 0 ) }
+                ],
+                interpolate: true
+            } )
+            var paletteFill = new PalettedFill( { lut, lookUpProperty: 'y' } )
+
+            var rows = ${dataResolution} - 1
+            var columns = ${dataResolution} - 1
+            var series = chart.addSurfaceSeries( {
+                type: SurfaceSeriesTypes3D.Mesh,
+                rows,
+                columns,
+                start: { x: 0, z: ${dataResolution} },
+                end: { x: ${dataResolution}, z: 0 },
+                pixelate: true
+            } )
+                .setWireframeStyle(new SolidFill({ color: ColorRGBA(0,0,0, 180) }))
+            ${usePalette ? `series.setFillStyle( paletteFill )` : 'series.setFillStyle(new SolidFill({ color: ColorRGBA(172, 30, 20) }))'}
+
+            ${addDataImmediately ? `series.invalidateGeometryOnly(data)` : ''}
+            
+            return {
+                data: data,
+                series: series
+            }
+        }`
+    }
+
+    for (var groupInfo of groupsInfo) {
+        var group = tests3D.Group(groupInfo)
+        for (var usePalette of [false, true]) {
+            var usePaletteLabel = usePalette ? ' palette' : ''
+            for (var dataResolution of groupInfo.dataResolutions) {
+                group.Test({
+                    defaultSelected: dataResolution*dataResolution < 100000,
+                    key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
+                    label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
+                    code: ProtoTestCode(
+                        locateChart3D,
+                        generateSurfaceGeometryData(dataResolution),
+                        initChartCode(true, usePalette, dataResolution),
+                        `function (env) {
+                            return new Promise(function (resolve, reject) {
+                                setTimeout(resolve, 1000)
+                            })
+                        }`
                     )
                 })
             }

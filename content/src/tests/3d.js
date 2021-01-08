@@ -5,34 +5,6 @@ var tests3D = Group({
     key: '3d',
     label: '3D'
 })
-tests3D
-    .Test({
-        key: 'test',
-        label: 'test',
-        defaultSelected: false,
-        code: ProtoTestCode(
-            `function() {
-                console.log('1')
-                var lightningChart = require('lcjs').lightningChart
-                var chart3D = lightningChart().Chart3D()
-                return chart3D
-            }`,
-            `function() {
-                console.log('2')
-                return new Promise(function (resolve, reject) {
-                    resolve([])
-                })
-            }`,
-            `function (data, chart) {
-                console.log('3')
-            }`,
-            `function (env) {
-                return new Promise(function (resolve, reject) {
-                    console.log('4')
-                })
-            }`
-        )
-    })
 
 var locateChart3D = `function() {
     var lightningChart = require('lcjs').lightningChart
@@ -145,7 +117,7 @@ var locateChart3D = `function() {
                 `
         },
         {
-            defaultSelected: true,
+            defaultSelected: false,
             key: 'pointLineSeries3D sphere',
             label: 'Point Line Series 3D \'sphere\'',
             pointAmounts: [
@@ -219,9 +191,139 @@ var locateChart3D = `function() {
                             series: series
                         }
                     }`,
-                    StreamData(false)
+                    StreamData(pointAmount, false)
                 )
             })
+        }
+    }
+})()
+
+// #endregion
+
+// #region ----- Surface Grid Series -----
+
+;(function () {
+
+    var groupsInfo = [
+        {
+            defaultSelected: true,
+            key: 'surfaceGrid3D',
+            label: 'Surface Grid 3D',
+            dataResolutions: [
+                // 50 x 50 = 2500
+                50,
+                // 100 x 100 = 10 000
+                100
+            ]
+        }
+    ]
+
+    var generateSpectrogramData = function (dataResolution) {
+        return `function () {
+            var createSpectrumDataGenerator = require('xydata').createSpectrumDataGenerator
+            return createSpectrumDataGenerator()
+                .setSampleSize( ${dataResolution} )
+                .setNumberOfSamples( ${dataResolution} )
+                .setVariation( 3 )
+                .generate()
+                .toPromise()
+                // Scale Y values from [0.0, 1.0] to [0.0, 80]
+                .then( function(sample) {
+                    return sample.map( function(yArr) {
+                        return yArr.map(function(y) {
+                            return y * 80
+                        })
+                    } )
+                } )
+        }`
+    }
+
+    var initChartCode = function (addDataImmediately, usePalette) {
+        return `function (data, chart) {
+            var { SurfaceSeriesTypes3D, LUT, PalettedFill, SolidFill, ColorRGBA } = require('lcjs')
+
+            chart.getDefaultAxisX().setInterval(0, ${dataResolution}, false, true)
+            chart.getDefaultAxisY().setInterval(0, 80, false, true)
+            chart.getDefaultAxisZ().setInterval(-${dataResolution}, 0, false, true)
+
+            var lut = new LUT( {
+                steps: [
+                    { value: 0, color: ColorRGBA( 4, 11, 125 ) },
+                    { value: 15, color: ColorRGBA( 4, 11, 125 ) },
+                    { value: 30, color: ColorRGBA( 4, 130, 5 ) },
+                    { value: 60, color: ColorRGBA( 132, 15, 4 ) },
+                    { value: 100, color: ColorRGBA( 255, 255, 0 ) }
+                ],
+                interpolate: true
+            } )
+            var paletteFill = new PalettedFill( { lut, lookUpProperty: 'y' } )
+
+            var rows = ${dataResolution} - 1
+            var columns = ${dataResolution} - 1
+            var series = chart.addSurfaceSeries( {
+                type: SurfaceSeriesTypes3D.Grid,
+                rows,
+                columns,
+                start: { x: 0, z: ${dataResolution} },
+                end: { x: ${dataResolution}, z: 0 },
+                pixelate: true
+            } )
+            ${usePalette ? `series.setFillStyle( paletteFill )` : 'series.setFillStyle(new SolidFill({ color: ColorRGBA(172, 30, 20) }))'}
+
+            ${addDataImmediately ? `series.addRow( ${dataResolution}, 'y', data )` : ''}
+            
+            return {
+                data: data,
+                series: series
+            }
+        }`
+    }
+
+    var streamSpectrogramData = StreamAbstractData(
+        `function(dataToAddCount, data, addedPointCount, series) {
+            var samples = data.splice(0, dataToAddCount)
+            series[0].addRow(dataToAddCount, 'y', samples)
+        }`
+    )
+
+    for (var groupInfo of groupsInfo) {
+        var group = tests3D.Group(groupInfo)
+        var groupStatic = group.Group({
+            key: 'static',
+            label: 'Static'
+        })
+        var groupScrolling = group.Group({
+            key: 'scrolling',
+            label: 'scrolling'
+        })
+        for (var usePalette of [false, true]) {
+            var usePaletteLabel = usePalette ? ' palette' : ''
+            for (var dataResolution of groupInfo.dataResolutions) {
+                groupStatic.Test({
+                    key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
+                    label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
+                    code: ProtoTestCode(
+                        locateChart3D,
+                        generateSpectrogramData(dataResolution),
+                        initChartCode(true, usePalette),
+                        `function (env) {
+                            return new Promise(function (resolve, reject) {
+                                setTimeout(resolve, 1000)
+                            })
+                        }`
+                    )
+                })
+                groupScrolling.Test({
+                    key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
+                    label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
+                    code: ProtoTestCode(
+                        locateChart3D,
+                        generateSpectrogramData(dataResolution),
+                        initChartCode(false, usePalette),
+                        streamSpectrogramData(dataResolution)
+                    )
+                })
+            }
         }
     }
 })()

@@ -193,7 +193,7 @@
 //                 series: series
 //             }
 //         }`,
-//         StreamData(true)
+//         StreamData(pointCount, true)
 //     )
 // }
 // /**
@@ -339,7 +339,7 @@
 //                 series: series
 //             }
 //         }`,
-//         StreamData(true)
+//         StreamData(pointCount, true)
 //     )
 // }
 // /** 
@@ -402,7 +402,7 @@
 //                 series: series
 //             }
 //         }`,
-//         StreamData(false)
+//         StreamData(pointCount, false)
 //     )
 // }
 // /**
@@ -463,7 +463,7 @@
 //                 series: series
 //             }
 //         }`,
-//         StreamData(true)
+//         StreamData(pointCount, true)
 //     )
 // }
 // /**
@@ -518,7 +518,7 @@
 //                 series: series
 //             }
 //         }`,
-//         StreamData()
+//         StreamData(pointCount)
 //     )
 // }
 // var OHLCSeriesFit = function (pointCount, generator, ohlcSeriesType, ohlcFigureType, title) {

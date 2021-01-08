@@ -176,37 +176,45 @@ try {
 `
 }
 
+var StreamAbstractData = function ( addDataN ) {
+    return function (dataCount, relax = false) {
+        return `
+            function (env) {
+                var data = env.data
+                var series = env.series
+                if (! ('length' in series)) series = [series]
+                return new Promise(function (resolve, reject) {
+                    var tStart = window.performance.now()
+                    var relaxTime = ${relax} ? Math.min(1000, testDuration * .2) : 0
+                    var pointCount = ${dataCount}
+                    var addedPointCount = 0
+                    var iData = setInterval(function() {
+                        var tNow = window.performance.now()
+                        var dataToAddCount = Math.floor(((tNow - tStart) / (testDuration - relaxTime)) * pointCount - addedPointCount)
+                        ;(${addDataN})(dataToAddCount, data, addedPointCount, series)
+                        addedPointCount += dataToAddCount
+                        if (addedPointCount >= pointCount) {
+                            clearInterval(iData)
+                            setTimeout(resolve, relaxTime)
+                        }
+                    }, 32)
+                })
+            }`
+    }
+}
+
 /**
  * Template factory for data streaming function, that tries to time data streaming nicely based on requested test duration.
  * NOTE: Utilizes predefined variables: env & testDuration
  *
  * Assumes following env parameters from initChart: 'data' and 'series'
  */
-var StreamData = function (relax = false) {
-    return `
-        function (env) {
-            var data = env.data
-            var series = env.series
-            if (! ('length' in series)) series = [series]
-            return new Promise(function (resolve, reject) {
-                var tStart = window.performance.now()
-                var relaxTime = ${relax} ? Math.min(1000, testDuration * .2) : 0
-                var pointCount = data.length
-                var addedPointCount = 0
-                var iData = setInterval(function() {
-                    var tNow = window.performance.now()
-                    var dataToAddCount = Math.floor(((tNow - tStart) / (testDuration - relaxTime)) * pointCount - addedPointCount)
-                    var splicedData = data.splice(0, dataToAddCount)
-                    for (var i = 0; i < series.length; i++){
-                        var s = series[i]
-                        s.add(splicedData)
-                    }
-                    addedPointCount += dataToAddCount
-                    if (data.length == 0) {
-                        clearInterval(iData)
-                        setTimeout(resolve, relaxTime)
-                    }
-                }, 32)
-            })
-        }`
-}
+var StreamData = StreamAbstractData(
+    `function(dataToAddCount, data, addedPointCount, series) {
+        var splicedData = data.splice(0, dataToAddCount)
+        for (var i = 0; i < series.length; i++){
+            var s = series[i]
+            s.add(splicedData)
+        }
+    }`
+)

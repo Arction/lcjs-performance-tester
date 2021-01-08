@@ -63,7 +63,7 @@ var locateChart3D = `function() {
 
     var groupsInfo = [
         {
-            defaultSelected: false,
+            defaultSelected: true,
             key: 'pointSeries3D cube',
             label: 'Point Series 3D \'cube\'',
             pointAmounts: [
@@ -81,7 +81,7 @@ var locateChart3D = `function() {
                 `
         },
         {
-            defaultSelected: false,
+            defaultSelected: true,
             key: 'pointCloudSeries3D',
             label: 'Point Cloud Series 3D',
             pointAmounts: [
@@ -100,7 +100,7 @@ var locateChart3D = `function() {
                 `
         },
         {
-            defaultSelected: false,
+            defaultSelected: true,
             key: 'lineSeries3D',
             label: 'Line Series 3D',
             pointAmounts: [
@@ -117,7 +117,7 @@ var locateChart3D = `function() {
                 `
         },
         {
-            defaultSelected: false,
+            defaultSelected: true,
             key: 'pointLineSeries3D sphere',
             label: 'Point Line Series 3D \'sphere\'',
             pointAmounts: [
@@ -206,7 +206,7 @@ var locateChart3D = `function() {
 
     var groupsInfo = [
         {
-            defaultSelected: false,
+            defaultSelected: true,
             key: 'surfaceGrid3D',
             label: 'Surface Grid 3D',
             dataResolutions: [
@@ -367,7 +367,7 @@ var locateChart3D = `function() {
                         var radius = Math.abs( y2( column ) - y1( column ) )
                         data[row][column] = {
                             x: Math.sin( angle ) * radius,
-                            y: Math.cos( angle ) * radius,
+                            y: 3.55 + Math.cos( angle ) * radius,
                             z: column
                         }
                     }
@@ -382,16 +382,15 @@ var locateChart3D = `function() {
             var { SurfaceSeriesTypes3D, LUT, PalettedFill, SolidFill, ColorRGBA } = require('lcjs')
 
             chart.getDefaultAxisX().setInterval( -3.55, 3.55, false, true )
-            chart.getDefaultAxisY().setInterval( -3.55, 3.55, false, true )
+            chart.getDefaultAxisY().setInterval( 0, 2 * 3.55, false, true )
             chart.getDefaultAxisZ().setInterval( 0, ${dataResolution}, false, true )
 
             var lut = new LUT( {
                 steps: [
-                    { value: 0, color: ColorRGBA( 4, 11, 125 ) },
-                    { value: 15, color: ColorRGBA( 4, 11, 125 ) },
-                    { value: 30, color: ColorRGBA( 4, 130, 5 ) },
-                    { value: 60, color: ColorRGBA( 132, 15, 4 ) },
-                    { value: 100, color: ColorRGBA( 255, 255, 0 ) }
+                    { value: 0, color: ColorRGBA( 255, 0, 0 ) },
+                    { value: 1.0, color: ColorRGBA( 255, 0, 0 ) },
+                    { value: 4.0, color: ColorRGBA( 0, 0, 255 ) },
+                    { value: 6.0, color: ColorRGBA( 255, 255, 255 ) },
                 ],
                 interpolate: true
             } )
@@ -425,7 +424,7 @@ var locateChart3D = `function() {
             var usePaletteLabel = usePalette ? ' palette' : ''
             for (var dataResolution of groupInfo.dataResolutions) {
                 group.Test({
-                    defaultSelected: dataResolution*dataResolution < 100000,
+                    defaultSelected: groupInfo.defaultSelected && dataResolution*dataResolution < 100000,
                     key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     code: ProtoTestCode(
@@ -437,6 +436,158 @@ var locateChart3D = `function() {
                                 setTimeout(resolve, 1000)
                             })
                         }`
+                    )
+                })
+            }
+        }
+    }
+})()
+
+// #endregion
+
+
+// #region ----- Box 3D Series -----
+
+;(function () {
+
+    var groupsInfo = [
+        {
+            defaultSelected: true,
+            key: 'box3D',
+            label: 'Box Series 3D',
+            dataResolutions: [
+                // 50 x 50 = 2500
+                50,
+                // 100 x 100 = 10 000
+                100,
+                // 250 x 250 = 62 500
+                250,
+                // 500 x 500 = 250 000
+                500
+            ]
+        }
+    ]
+
+    var generateSpectrogramData = function (dataResolution) {
+        return `function () {
+            var createSpectrumDataGenerator = require('xydata').createSpectrumDataGenerator
+            return createSpectrumDataGenerator()
+                .setSampleSize( ${dataResolution} )
+                .setNumberOfSamples( ${dataResolution} )
+                .setVariation( 3 )
+                .generate()
+                .toPromise()
+                // Scale Y values from [0.0, 1.0] to [0.0, 80]
+                .then( function(data) {
+                    return data.map( function(yArr) {
+                        return yArr.map(function(y) {
+                            return y * 80
+                        })
+                    } )
+                } )
+                // Map Y values to a Row of Boxes.
+                .then( function(data) {
+                    // Map Y values to BoxDataBounds format.
+                    var boxes = []
+                    data.forEach( function( yArr, sampleIndex ) {
+                        boxes.push.apply(boxes, yArr.map(function(y, iX) {
+                            return {
+                                xMin: iX,
+                                xMax: iX + 1.0,
+                                yMin: 0,
+                                yMax: y,
+                                zMin: sampleIndex,
+                                zMax: sampleIndex + 1.0,
+                                // Color each Box by their sampled Y value (height).
+                                value: y
+                            }
+                        }))
+                    })
+                    return boxes
+                } )
+        }`
+    }
+
+    var initChartCode = function (addDataImmediately, usePalette) {
+        return `function (data, chart) {
+            var { LUT, PalettedFill, SolidFill, ColorRGBA } = require('lcjs')
+
+            chart.getDefaultAxisX().setInterval(0, ${dataResolution}, false, true)
+            chart.getDefaultAxisY().setInterval(0, 80, false, true)
+            chart.getDefaultAxisZ().setInterval(0, ${dataResolution}, false, true)
+
+            var lut = new LUT( {
+                steps: [
+                    { value: 0, color: ColorRGBA( 4, 11, 125 ) },
+                    { value: 15, color: ColorRGBA( 4, 11, 125 ) },
+                    { value: 30, color: ColorRGBA( 4, 130, 5 ) },
+                    { value: 60, color: ColorRGBA( 132, 15, 4 ) },
+                    { value: 100, color: ColorRGBA( 255, 255, 0 ) }
+                ],
+                interpolate: true
+            } )
+            var paletteFill = new PalettedFill( { lut, lookUpProperty: 'value' } )
+
+            var series = chart.addBoxSeries()
+                .setFillStyle( paletteFill )
+                .setRoundedEdges( undefined )
+            ${usePalette ? `series.setFillStyle( paletteFill )` : 'series.setFillStyle(new SolidFill({ color: ColorRGBA(172, 30, 20) }))'}
+
+            ${addDataImmediately ? `series.invalidateData(data)` : ''}
+            
+            return {
+                data: data,
+                series: series
+            }
+        }`
+    }
+
+    var streamBoxData = function(dataResolution) {
+        return StreamAbstractData(
+            `function(dataToAddCount, data, addedPointCount, series) {
+                var boxes = data.splice(0, dataToAddCount * ${dataResolution})
+                series[0].invalidateData(boxes)
+            }`
+        )(dataResolution)
+    }
+
+    for (var groupInfo of groupsInfo) {
+        var group = tests3D.Group(groupInfo)
+        var groupStatic = group.Group({
+            key: 'static',
+            label: 'Static'
+        })
+        var groupScrolling = group.Group({
+            key: 'scrolling',
+            label: 'scrolling'
+        })
+        for (var usePalette of [false, true]) {
+            var usePaletteLabel = usePalette ? ' palette' : ''
+            for (var dataResolution of groupInfo.dataResolutions) {
+                groupStatic.Test({
+                    defaultSelected: groupInfo.defaultSelected && dataResolution * dataResolution < 100000,
+                    key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
+                    label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
+                    code: ProtoTestCode(
+                        locateChart3D,
+                        generateSpectrogramData(dataResolution),
+                        initChartCode(true, usePalette),
+                        `function (env) {
+                            return new Promise(function (resolve, reject) {
+                                setTimeout(resolve, 1000)
+                            })
+                        }`
+                    )
+                })
+                groupScrolling.Test({
+                    defaultSelected: groupInfo.defaultSelected && dataResolution * dataResolution < 100000,
+                    key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
+                    label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
+                    code: ProtoTestCode(
+                        locateChart3D,
+                        generateSpectrogramData(dataResolution),
+                        initChartCode(false, usePalette),
+                        streamBoxData(dataResolution)
                     )
                 })
             }

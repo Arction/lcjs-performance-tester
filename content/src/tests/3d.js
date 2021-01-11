@@ -142,13 +142,13 @@ var locateChart3D = `function() {
     
     for (var groupInfo of groupsInfo) {
         var group = tests3D.Group(groupInfo)
-        var groupStatic = group.Group({
-            key: 'static',
-            label: 'Static'
-        })
         var groupRealtime = group.Group({
             key: 'realtime',
             label: 'Realtime'
+        })
+        var groupStatic = group.Group({
+            key: 'static',
+            label: 'Static'
         })
         for (var pointAmount of groupInfo.pointAmounts) {
             groupStatic.Test({
@@ -288,13 +288,13 @@ var locateChart3D = `function() {
 
     for (var groupInfo of groupsInfo) {
         var group = tests3D.Group(groupInfo)
-        var groupStatic = group.Group({
-            key: 'static',
-            label: 'Static'
-        })
         var groupScrolling = group.Group({
             key: 'scrolling',
             label: 'scrolling'
+        })
+        var groupStatic = group.Group({
+            key: 'static',
+            label: 'Static'
         })
         for (var usePalette of [false, true]) {
             var usePaletteLabel = usePalette ? ' palette' : ''
@@ -553,13 +553,13 @@ var locateChart3D = `function() {
 
     for (var groupInfo of groupsInfo) {
         var group = tests3D.Group(groupInfo)
-        var groupStatic = group.Group({
-            key: 'static',
-            label: 'Static'
-        })
         var groupScrolling = group.Group({
             key: 'scrolling',
             label: 'scrolling'
+        })
+        var groupStatic = group.Group({
+            key: 'static',
+            label: 'Static'
         })
         for (var usePalette of [false, true]) {
             var usePaletteLabel = usePalette ? ' palette' : ''

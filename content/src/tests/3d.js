@@ -212,8 +212,8 @@ var locateChart3D = `function() {
             dataResolutions: [
                 // 50 x 50 = 2500
                 50,
-                // 100 x 100 = 10 000
-                100
+                // 75 x 75 = 5625
+                75
             ]
         }
     ]

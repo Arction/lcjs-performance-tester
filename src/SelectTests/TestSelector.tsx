@@ -32,6 +32,10 @@ interface TestSelectorState {
      * TODO: Comments
      */
     collapsions: Map<TestGroup, boolean>
+    /**
+     * Starting default tests automatically in n seconds.
+     */
+    autoStartIn: number | undefined
 }
 /**
  * TODO: Comments
@@ -100,8 +104,25 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
             testDurationSelectionIndex: 6,
             repeatCountSelectionIndex: 2,
             selections,
-            collapsions
+            collapsions,
+            autoStartIn: 5
         }
+    }
+    componentDidMount() {
+        const tStart = Date.now()
+        const updateAutoStartCounter = () => {
+            if ( this.state.autoStartIn === undefined || this.state.autoStartIn === 0 ) return
+            const autoStartIn = Math.ceil(5 - (Date.now() - tStart) / 1000)
+            if (autoStartIn !== this.state.autoStartIn) {
+                this.setState({ autoStartIn })
+                if (autoStartIn === 0) {
+                    // Auto-start default tests.
+                    this.onClickRun()
+                }
+            }
+            requestAnimationFrame(updateAutoStartCounter)
+        }
+        requestAnimationFrame(updateAutoStartCounter)
     }
     setItemSelected = ( item: TestItem, selected: boolean, selections: OrderedMap<TestItem, boolean> ) => {
         // Toggle item selection.
@@ -138,7 +159,9 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
     onToggleSelected = ( item: TestItem ) => {
         // Toggle item selection.
         this.setState( {
-            selections: this.setItemSelected( item, !this.state.selections.get( item ), this.state.selections )
+            selections: this.setItemSelected( item, !this.state.selections.get( item ), this.state.selections ),
+            // Disable auto start.
+            autoStartIn: undefined
         } )
     }
     onToggleCollapsed = ( item: TestGroup ) => {
@@ -170,13 +193,17 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
     onClickTestDuration = () => {
         const nextIndex = this.state.testDurationSelectionIndex + 1
         this.setState( {
-            testDurationSelectionIndex: nextIndex < testDurationOptions.length ? nextIndex : 0
+            testDurationSelectionIndex: nextIndex < testDurationOptions.length ? nextIndex : 0,
+            // Disable auto start.
+            autoStartIn: undefined
         } )
     }
     onClickRepeatCount = () => {
         const nextIndex = this.state.repeatCountSelectionIndex + 1
         this.setState( {
-            repeatCountSelectionIndex: nextIndex < repeatCountOptions.length ? nextIndex : 0
+            repeatCountSelectionIndex: nextIndex < repeatCountOptions.length ? nextIndex : 0,
+            // Disable auto start.
+            autoStartIn: undefined
         } )
     }
     reduceSelectedItems = ( prev: { count: number, available: number }, item: TestItem ) => {
@@ -225,7 +252,7 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
         isGroup( item ) ? this.renderGroup( item, tabs ) : this.renderTest( item, tabs )
     render() {
         const { tests } = this.props
-        const { testDurationSelectionIndex, repeatCountSelectionIndex } = this.state
+        const { testDurationSelectionIndex, repeatCountSelectionIndex, autoStartIn } = this.state
 
         const selectedTestDuration = testDurationOptions[testDurationSelectionIndex]
         const selectedRepeatCount = repeatCountOptions[repeatCountSelectionIndex]
@@ -273,6 +300,11 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
                         }
                     </div>
                 </nav>
+                <div className={'AutoStartDiv' + (autoStartIn === undefined || autoStartIn <= 0 ? ' AutoStartDiv-hidden' : '')}
+                    onClick={() => this.setState({ autoStartIn: undefined })}
+                >
+                    {autoStartIn === undefined ? 'Cancelled' : `Starting tests in ${autoStartIn}...`}
+                </div>
             </div>
         )
     }

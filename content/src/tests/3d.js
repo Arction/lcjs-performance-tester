@@ -6,12 +6,16 @@ var tests3D = Group({
     label: '3D'
 })
 
-var locateChart3D = `function() {
-    var lightningChart = require('lcjs').lightningChart
-    var chart = lightningChart().Chart3D()
-    chart.setCameraLocation({x: 1.0489653067913933, y: 0.5640370604112517, z: 0.5555008268409382})
-    return chart
-}`
+var locateChart3D = function (conf) {
+    var title = conf && conf.title ? conf.title : ''
+    return `function() {
+        var lightningChart = require('lcjs').lightningChart
+        var chart = lightningChart().Chart3D()
+            .setTitle("${title}")
+        chart.setCameraLocation({x: 1.0489653067913933, y: 0.5640370604112517, z: 0.5555008268409382})
+        return chart
+    }`
+}
 
 // ----- Shared test suite for following 3D series types: -----
 // - Point Series 3D
@@ -160,7 +164,7 @@ var locateChart3D = `function() {
                 key: `${pointAmount/1000} k`,
                 label: `${pointAmount/1000} k points`,
                 code: ProtoTestCode(
-                    locateChart3D,
+                    locateChart3D({ title: `Point Series 3D ${pointAmount/1000} k points` }),
                     groupInfo.generator(pointAmount),
                     `function (data, chart) {
                         chart.getDefaultAxisX().setInterval(0, 100, false, true)
@@ -185,7 +189,7 @@ var locateChart3D = `function() {
                 key: `${pointAmount/1000} k`,
                 label: `${pointAmount/1000} k points`,
                 code: ProtoTestCode(
-                    locateChart3D,
+                    locateChart3D({ title: `Point Series 3D ${pointAmount/1000} k points realtime` }),
                     groupInfo.generator(pointAmount),
                     `function (data, chart) {
                         chart.getDefaultAxisX().setInterval(0, 100, false, true)
@@ -309,7 +313,7 @@ var locateChart3D = `function() {
                     key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     code: ProtoTestCode(
-                        locateChart3D,
+                        locateChart3D({ title: `Surface Grid Series 3D ${dataResolution}x${dataResolution}` }),
                         generateSpectrogramData(dataResolution),
                         initChartCode(true, usePalette),
                         `function (env) {
@@ -324,7 +328,7 @@ var locateChart3D = `function() {
                     key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     code: ProtoTestCode(
-                        locateChart3D,
+                        locateChart3D({ title: `Surface Grid Series 3D ${dataResolution}x${dataResolution} realtime` }),
                         generateSpectrogramData(dataResolution),
                         initChartCode(false, usePalette),
                         streamSpectrogramData(dataResolution)
@@ -435,7 +439,7 @@ var locateChart3D = `function() {
                     key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     code: ProtoTestCode(
-                        locateChart3D,
+                        locateChart3D({ title: `Surface Mesh Series 3D ${dataResolution}x${dataResolution}` }),
                         generateSurfaceGeometryData(dataResolution),
                         initChartCode(true, usePalette, dataResolution),
                         `function (env) {
@@ -575,7 +579,7 @@ var locateChart3D = `function() {
                     key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     code: ProtoTestCode(
-                        locateChart3D,
+                        locateChart3D({ title: `Box Series 3D ${dataResolution}x${dataResolution}` }),
                         generateSpectrogramData(dataResolution),
                         initChartCode(true, usePalette),
                         `function (env) {
@@ -590,7 +594,7 @@ var locateChart3D = `function() {
                     key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     code: ProtoTestCode(
-                        locateChart3D,
+                        locateChart3D({ title: `Box Series 3D ${dataResolution}x${dataResolution} realtime` }),
                         generateSpectrogramData(dataResolution),
                         initChartCode(false, usePalette),
                         streamBoxData(dataResolution)

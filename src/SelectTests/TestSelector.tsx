@@ -97,8 +97,8 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
         } )
 
         this.state = {
-            testDurationSelectionIndex: 0,
-            repeatCountSelectionIndex: 0,
+            testDurationSelectionIndex: 6,
+            repeatCountSelectionIndex: 2,
             selections,
             collapsions
         }

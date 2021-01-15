@@ -2,7 +2,7 @@
 // Everything defined in tools.js is usable here.
 
 var tests3D = Group({
-    key: '3d',
+    key: '3D',
     label: '3D'
 })
 

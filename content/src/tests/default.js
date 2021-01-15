@@ -599,7 +599,7 @@ var OHLCSeriesFit = function (pointCount, generator, ohlcSeriesType, ohlcFigureT
 
 // Create test content (XY).
 var xy = Group({
-    key: 'xy',
+    key: 'XY',
     label: 'XY'
 })
 

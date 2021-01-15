@@ -27,6 +27,7 @@ var _GroupFactory = function (target, keySuffix = '') {
              * @param   { key, label, code, defaultSelected }    params
              */
             Test: function (params) {
+                params.defaultSelected = params.defaultSelected !== undefined ? params.defaultSelected : false
                 groupItem.members.push({
                     key: groupItem.key + params.key,
                     label: params.label,

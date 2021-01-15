@@ -67,12 +67,13 @@ var locateChart3D = function (conf) {
 
     var groupsInfo = [
         {
-            defaultSelected: true,
             key: 'pointSeries3D cube',
             label: 'Point Series 3D \'cube\'',
             featureName: 'Point Series 3D',
+            preview: 'point-series-3D.png',
             pointAmounts: [
                 100 * 1000,
+                250 * 1000,
                 500 * 1000,
                 1000 * 1000,
                 1500 * 1000
@@ -87,12 +88,13 @@ var locateChart3D = function (conf) {
                 `
         },
         {
-            defaultSelected: true,
             key: 'pointCloudSeries3D',
             label: 'Point Cloud Series 3D',
             featureName: 'Point Cloud Series 3D',
+            defaultSelected: ({ pointAmount }) => pointAmount === 250 * 1000,
             pointAmounts: [
                 100 * 1000,
+                250 * 1000,
                 500 * 1000,
                 1000 * 1000,
                 1500 * 1000
@@ -108,12 +110,13 @@ var locateChart3D = function (conf) {
                 `
         },
         {
-            defaultSelected: true,
             key: 'lineSeries3D',
             label: 'Line Series 3D',
             featureName: 'Line Series 3D',
+            defaultSelected: ({ pointAmount }) => pointAmount === 25 * 1000,
             pointAmounts: [
                 10 * 1000,
+                25 * 1000,
                 100 * 1000,
                 250 * 1000,
                 500 * 1000
@@ -129,12 +132,13 @@ var locateChart3D = function (conf) {
                 `
         },
         {
-            defaultSelected: true,
             key: 'pointLineSeries3D sphere',
             label: 'Point Line Series 3D \'sphere\'',
             featureName: 'Point Line Series 3D',
+            defaultSelected: ({ pointAmount }) => pointAmount === 25 * 1000,
             pointAmounts: [
                 10 * 1000,
+                25 * 1000,
                 100 * 1000,
                 250 * 1000,
                 500 * 1000
@@ -191,6 +195,7 @@ var locateChart3D = function (conf) {
                 )
             })
             groupRealtime.Test({
+                defaultSelected: groupInfo.defaultSelected && groupInfo.defaultSelected({pointAmount}),
                 key: `${pointAmount/1000} k`,
                 label: `${pointAmount/1000} k points`,
                 code: ProtoTestCode(
@@ -221,7 +226,7 @@ var locateChart3D = function (conf) {
 
     var groupsInfo = [
         {
-            defaultSelected: true,
+            defaultSelected: ({ dataResolution, usePalette }) => usePalette === true && dataResolution === 50,
             key: 'surfaceGrid3D',
             label: 'Surface Grid 3D',
             dataResolutions: [
@@ -331,6 +336,7 @@ var locateChart3D = function (conf) {
                     )
                 })
                 groupScrolling.Test({
+                    defaultSelected: groupInfo.defaultSelected && groupInfo.defaultSelected({dataResolution, usePalette}),
                     key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     code: ProtoTestCode(
@@ -353,7 +359,7 @@ var locateChart3D = function (conf) {
 
     var groupsInfo = [
         {
-            defaultSelected: true,
+            defaultSelected: ({ dataResolution, usePalette }) => usePalette === true && dataResolution === 50,
             key: 'surfaceMesh3D',
             label: 'Surface Mesh 3D',
             dataResolutions: [
@@ -441,7 +447,7 @@ var locateChart3D = function (conf) {
             var usePaletteLabel = usePalette ? ' palette' : ''
             for (var dataResolution of groupInfo.dataResolutions) {
                 group.Test({
-                    defaultSelected: groupInfo.defaultSelected && dataResolution*dataResolution < 100000,
+                    defaultSelected: groupInfo.defaultSelected && groupInfo.defaultSelected({dataResolution, usePalette}),
                     key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     code: ProtoTestCode(
@@ -469,7 +475,7 @@ var locateChart3D = function (conf) {
 
     var groupsInfo = [
         {
-            defaultSelected: true,
+            defaultSelected: ({ dataResolution, usePalette }) => usePalette === true && dataResolution === 100,
             key: 'box3D',
             label: 'Box Series 3D',
             dataResolutions: [
@@ -582,7 +588,6 @@ var locateChart3D = function (conf) {
             var usePaletteLabel = usePalette ? ' palette' : ''
             for (var dataResolution of groupInfo.dataResolutions) {
                 groupStatic.Test({
-                    defaultSelected: groupInfo.defaultSelected && dataResolution * dataResolution < 100000,
                     key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     code: ProtoTestCode(
@@ -597,7 +602,7 @@ var locateChart3D = function (conf) {
                     )
                 })
                 groupScrolling.Test({
-                    defaultSelected: groupInfo.defaultSelected && dataResolution * dataResolution < 100000,
+                    defaultSelected: groupInfo.defaultSelected && groupInfo.defaultSelected({usePalette, dataResolution}),
                     key: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     label: `${dataResolution}x${dataResolution}${usePaletteLabel}`,
                     code: ProtoTestCode(

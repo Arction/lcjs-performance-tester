@@ -14,6 +14,10 @@ main {
   display: block;
 }
 
+ul {
+  padding-inline-start: 18px;
+}
+
 /* WordPress specific */
 #page-container {
   padding-top: 64px !important;

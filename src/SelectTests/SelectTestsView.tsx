@@ -56,7 +56,9 @@ export default class SelectTestsView extends React.PureComponent<SelectTestsView
                     </ul>
                 </div>
                 <div>
-                    <MeasurementLegend />
+                    <MeasurementLegend
+                        style={{marginLeft: '16px'}}
+                    ></MeasurementLegend>
                 </div>
             </div>
             <div>

@@ -71,9 +71,10 @@ var locateChart3D = function (conf) {
             key: 'pointSeries3D cube',
             label: 'Point Series 3D \'cube\'',
             pointAmounts: [
-                10 * 1000,
                 100 * 1000,
-                1000 * 1000
+                500 * 1000,
+                1000 * 1000,
+                1500 * 1000
             ],
             generator: generateScatterData3D,
             initSeries: `
@@ -89,9 +90,10 @@ var locateChart3D = function (conf) {
             key: 'pointCloudSeries3D',
             label: 'Point Cloud Series 3D',
             pointAmounts: [
-                10 * 1000,
                 100 * 1000,
-                1000 * 1000
+                500 * 1000,
+                1000 * 1000,
+                1500 * 1000
             ],
             generator: generateScatterData3D,
             initSeries: `
@@ -109,14 +111,17 @@ var locateChart3D = function (conf) {
             label: 'Line Series 3D',
             pointAmounts: [
                 10 * 1000,
-                100 * 1000
+                100 * 1000,
+                250 * 1000,
+                500 * 1000
             ],
             generator: generateTraceData3D,
             initSeries: `
                 var series = chart.addLineSeries()
                     .setLineStyle(function (style) {
                         var lineThickness = Math.max(1, Math.round( 14 - 2 * Math.log10( data.length ) ))
-                        return style.setThickness(lineThickness)
+                        return style
+                            .setThickness(lineThickness)
                     })
                 `
         },
@@ -126,7 +131,9 @@ var locateChart3D = function (conf) {
             label: 'Point Line Series 3D \'sphere\'',
             pointAmounts: [
                 10 * 1000,
-                100 * 1000
+                100 * 1000,
+                250 * 1000,
+                500 * 1000
             ],
             generator: generateTraceData3D,
             initSeries: `
@@ -217,7 +224,9 @@ var locateChart3D = function (conf) {
                 // 50 x 50 = 2500
                 50,
                 // 75 x 75 = 5625
-                75
+                75,
+                // 100 x 100 = 10 000
+                100,
             ]
         }
     ]

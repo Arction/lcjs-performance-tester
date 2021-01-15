@@ -69,10 +69,14 @@ var locateChart3D = function (conf) {
         {
             key: 'pointSeries3D cube',
             label: 'Point Series 3D \'cube\'',
+            featureName: 'Point Series 3D',
+            preview: 'point-series-3D.png',
             pointAmounts: [
-                10 * 1000,
                 100 * 1000,
-                1000 * 1000
+                250 * 1000,
+                500 * 1000,
+                1000 * 1000,
+                1500 * 1000
             ],
             generator: generateScatterData3D,
             initSeries: `
@@ -86,13 +90,14 @@ var locateChart3D = function (conf) {
         {
             key: 'pointCloudSeries3D',
             label: 'Point Cloud Series 3D',
+            featureName: 'Point Cloud Series 3D',
             defaultSelected: ({ pointAmount }) => pointAmount === 250 * 1000,
             pointAmounts: [
-                10 * 1000,
                 100 * 1000,
                 250 * 1000,
                 500 * 1000,
-                1000 * 1000
+                1000 * 1000,
+                1500 * 1000
             ],
             generator: generateScatterData3D,
             initSeries: `
@@ -107,31 +112,36 @@ var locateChart3D = function (conf) {
         {
             key: 'lineSeries3D',
             label: 'Line Series 3D',
+            featureName: 'Line Series 3D',
             defaultSelected: ({ pointAmount }) => pointAmount === 25 * 1000,
             pointAmounts: [
                 10 * 1000,
                 25 * 1000,
-                50 * 1000,
-                100 * 1000
+                100 * 1000,
+                250 * 1000,
+                500 * 1000
             ],
             generator: generateTraceData3D,
             initSeries: `
                 var series = chart.addLineSeries()
                     .setLineStyle(function (style) {
                         var lineThickness = Math.max(1, Math.round( 14 - 2 * Math.log10( data.length ) ))
-                        return style.setThickness(lineThickness)
+                        return style
+                            .setThickness(lineThickness)
                     })
                 `
         },
         {
             key: 'pointLineSeries3D sphere',
             label: 'Point Line Series 3D \'sphere\'',
+            featureName: 'Point Line Series 3D',
             defaultSelected: ({ pointAmount }) => pointAmount === 25 * 1000,
             pointAmounts: [
                 10 * 1000,
                 25 * 1000,
-                50 * 1000,
-                100 * 1000
+                100 * 1000,
+                250 * 1000,
+                500 * 1000
             ],
             generator: generateTraceData3D,
             initSeries: `
@@ -164,7 +174,7 @@ var locateChart3D = function (conf) {
                 key: `${pointAmount/1000} k`,
                 label: `${pointAmount/1000} k points`,
                 code: ProtoTestCode(
-                    locateChart3D({ title: `Point Series 3D ${pointAmount/1000} k points` }),
+                    locateChart3D({ title: `${groupInfo.featureName} ${pointAmount/1000} k points` }),
                     groupInfo.generator(pointAmount),
                     `function (data, chart) {
                         chart.getDefaultAxisX().setInterval(0, 100, false, true)
@@ -189,7 +199,7 @@ var locateChart3D = function (conf) {
                 key: `${pointAmount/1000} k`,
                 label: `${pointAmount/1000} k points`,
                 code: ProtoTestCode(
-                    locateChart3D({ title: `Point Series 3D ${pointAmount/1000} k points realtime` }),
+                    locateChart3D({ title: `${groupInfo.featureName} ${pointAmount/1000} k points realtime` }),
                     groupInfo.generator(pointAmount),
                     `function (data, chart) {
                         chart.getDefaultAxisX().setInterval(0, 100, false, true)
@@ -223,7 +233,9 @@ var locateChart3D = function (conf) {
                 // 50 x 50 = 2500
                 50,
                 // 75 x 75 = 5625
-                75
+                75,
+                // 100 x 100 = 10 000
+                100,
             ]
         }
     ]

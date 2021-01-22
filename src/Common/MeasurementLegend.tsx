@@ -3,9 +3,9 @@ import { testMeasurementLegend } from './TestResultTable';
 /**
  * TODO: Comments
  */
-export default class MeasurementLegend extends React.PureComponent {
+export default class MeasurementLegend extends React.PureComponent<{ style?: React.CSSProperties }> {
     render() {
-        return <div>
+        return <div style={this.props.style}>
             <p className='LegendTitle'>Performance Test Legend</p>
             <ul style={{ marginBlockEnd: '0px', marginBlockStart: '0px' }}>
                 {

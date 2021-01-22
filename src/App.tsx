@@ -18,7 +18,8 @@ type AppState = {
     /**
      * TODO: Comments
      */
-    view: 'selectTests'
+    view: 'selectTests',
+    autoStart: boolean,
 } | {
     /**
      * TODO: Comments
@@ -55,7 +56,8 @@ export default class App extends React.PureComponent<{}, AppState> {
     constructor( props: {} ) {
         super( props )
         this.state = {
-            view: 'selectTests'
+            view: 'selectTests',
+            autoStart: true,
         }
     }
     onRun = ( selectedTests: OrderedSet<Test>, testDuration: number, repeatCount: number ) => {
@@ -73,19 +75,19 @@ export default class App extends React.PureComponent<{}, AppState> {
     returnToStartView = () => {
         // ----- Switch to SelectTests -----
         this.setState( {
-            view: 'selectTests'
+            view: 'selectTests',
+            autoStart: false
         } )
     }
     render() {
-        const { view } = this.state
-
         return <div className='App'>
             {
-                view === 'selectTests' ?
+                this.state.view === 'selectTests' ?
                     (
                         <SelectTestsView
                             tests={tests}
                             onRun={this.onRun}
+                            autoStart={this.state.autoStart}
                         />
                     )
                     :

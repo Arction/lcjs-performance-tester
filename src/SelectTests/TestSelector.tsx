@@ -14,6 +14,8 @@ interface TestSelectorProps {
      * TODO: Comments
      */
     onRun: ( selectedTests: OrderedSet<Test>, testDuration: number, repeatCount: number ) => void
+
+    autoStart: boolean
 }
 interface TestSelectorState {
     /**
@@ -32,6 +34,10 @@ interface TestSelectorState {
      * TODO: Comments
      */
     collapsions: Map<TestGroup, boolean>
+    /**
+     * Starting default tests automatically in n seconds.
+     */
+    autoStartIn: number | undefined
 }
 /**
  * TODO: Comments
@@ -75,6 +81,8 @@ const mapTestListRecursively = <T extends any>(
  * TODO: Comments
  */
 export default class TestSelector extends React.PureComponent<TestSelectorProps, TestSelectorState> {
+    onUnmount: Array<() => unknown> = []
+    
     constructor( props: TestSelectorProps ) {
         super( props )
         // Map initial state from TestItems.
@@ -97,11 +105,36 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
         } )
 
         this.state = {
-            testDurationSelectionIndex: 0,
-            repeatCountSelectionIndex: 0,
+            testDurationSelectionIndex: 6,
+            repeatCountSelectionIndex: 2,
             selections,
-            collapsions
+            collapsions,
+            autoStartIn: this.props.autoStart ? 5 : undefined
         }
+    }
+    componentDidMount() {
+        if (this.props.autoStart) {
+            let handle: number | undefined
+            const tStart = Date.now()
+            const updateAutoStartCounter = () => {
+                if ( this.state.autoStartIn === undefined || this.state.autoStartIn === 0 ) return
+                const autoStartIn = Math.ceil(5 - (Date.now() - tStart) / 1000)
+                if (autoStartIn !== this.state.autoStartIn) {
+                    this.setState({ autoStartIn })
+                    if (autoStartIn === 0) {
+                        // Auto-start default tests.
+                        this.onClickRun()
+                    }
+                }
+                handle = requestAnimationFrame(updateAutoStartCounter)
+            }
+            handle = requestAnimationFrame(updateAutoStartCounter)
+            this.onUnmount.push(() => handle && cancelAnimationFrame(handle))
+        }
+    }
+    componentWillUnmount() {
+        this.onUnmount.forEach((clbk) => clbk())
+        this.onUnmount.length = 0
     }
     setItemSelected = ( item: TestItem, selected: boolean, selections: OrderedMap<TestItem, boolean> ) => {
         // Toggle item selection.
@@ -138,7 +171,9 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
     onToggleSelected = ( item: TestItem ) => {
         // Toggle item selection.
         this.setState( {
-            selections: this.setItemSelected( item, !this.state.selections.get( item ), this.state.selections )
+            selections: this.setItemSelected( item, !this.state.selections.get( item ), this.state.selections ),
+            // Disable auto start.
+            autoStartIn: undefined
         } )
     }
     onToggleCollapsed = ( item: TestGroup ) => {
@@ -170,13 +205,17 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
     onClickTestDuration = () => {
         const nextIndex = this.state.testDurationSelectionIndex + 1
         this.setState( {
-            testDurationSelectionIndex: nextIndex < testDurationOptions.length ? nextIndex : 0
+            testDurationSelectionIndex: nextIndex < testDurationOptions.length ? nextIndex : 0,
+            // Disable auto start.
+            autoStartIn: undefined
         } )
     }
     onClickRepeatCount = () => {
         const nextIndex = this.state.repeatCountSelectionIndex + 1
         this.setState( {
-            repeatCountSelectionIndex: nextIndex < repeatCountOptions.length ? nextIndex : 0
+            repeatCountSelectionIndex: nextIndex < repeatCountOptions.length ? nextIndex : 0,
+            // Disable auto start.
+            autoStartIn: undefined
         } )
     }
     reduceSelectedItems = ( prev: { count: number, available: number }, item: TestItem ) => {
@@ -225,7 +264,7 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
         isGroup( item ) ? this.renderGroup( item, tabs ) : this.renderTest( item, tabs )
     render() {
         const { tests } = this.props
-        const { testDurationSelectionIndex, repeatCountSelectionIndex } = this.state
+        const { testDurationSelectionIndex, repeatCountSelectionIndex, autoStartIn } = this.state
 
         const selectedTestDuration = testDurationOptions[testDurationSelectionIndex]
         const selectedRepeatCount = repeatCountOptions[repeatCountSelectionIndex]
@@ -273,6 +312,11 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
                         }
                     </div>
                 </nav>
+                <div className={'AutoStartDiv' + (autoStartIn === undefined || autoStartIn <= 0 ? ' AutoStartDiv-hidden' : '')}
+                    onClick={() => this.setState({ autoStartIn: undefined })}
+                >
+                    {autoStartIn === undefined ? 'Cancelled' : `Starting tests in ${autoStartIn}...`}
+                </div>
             </div>
         )
     }

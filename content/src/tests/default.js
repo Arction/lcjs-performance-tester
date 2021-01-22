@@ -1,6 +1,4 @@
-/**
- * Everything defined in tools.js is usable here.
- */
+// Everything defined in tools.js is usable here.
 
 /**
  * Template factory for progressive Vec2 generation function.
@@ -54,37 +52,6 @@ var GenerateOHLC = function (pointCount) {
                 .setNumberOfPoints(${pointCount + 1})
                 .generate()
                 .toPromise()
-        }`
-}
-/**
- * Template factory for data streaming function, that tries to time data streaming nicely based on requested test duration.
- * NOTE: Utilizes predefined variables: env & testDuration
- */
-var StreamData = function (relax = false) {
-    return `
-        function (env) {
-            var data = env.data
-            var series = env.series
-            return new Promise(function (resolve, reject) {
-                var tStart = window.performance.now()
-                var relaxTime = ${relax} ? Math.min(1000, testDuration * .2) : 0
-                var pointCount = data.length
-                var addedPointCount = 0
-                var iData = setInterval(function() {
-                    var tNow = window.performance.now()
-                    var dataToAddCount = Math.floor(((tNow - tStart) / (testDuration - relaxTime)) * pointCount - addedPointCount)
-                    var splicedData = data.splice(0, dataToAddCount)
-                    for (var i = 0; i < series.length; i++){
-                        var s = series[i]
-                        s.add(splicedData)
-                    }
-                    addedPointCount += dataToAddCount
-                    if (data.length == 0) {
-                        clearInterval(iData)
-                        setTimeout(resolve, relaxTime)
-                    }
-                }, 32)
-            })
         }`
 }
 var scatterSeriesChunks = 10
@@ -190,7 +157,7 @@ var ScrollingProgressiveLine = function (pointCount, seriesCount, thickness, tit
                     columnSpan:1, 
                     rowSpan: 1
                 })
-                    .setPadding({ bottom: 0, top: 0 })
+                    .setPadding({ bottom: i < ${seriesCount - 1} ? 10 : 0, top: i > 0 ? 10 : 0 })
                     .setMouseInteractions(false)
                 var axisX = chart.getDefaultAxisX()
                     .setInterval(${-pointCount / 5}, 0)
@@ -224,7 +191,7 @@ var ScrollingProgressiveLine = function (pointCount, seriesCount, thickness, tit
                 series: series
             }
         }`,
-        StreamData(true)
+        StreamData(pointCount, true)
     )
 }
 /**
@@ -253,7 +220,7 @@ var StaticProgressiveLine = function (pointCount, seriesCount, thickness, title)
                     columnSpan:1, 
                     rowSpan: 1
                 })
-                    .setPadding({ bottom: 0, top: 0 })
+                    .setPadding({ bottom: i < ${seriesCount - 1} ? 10 : 0, top: i > 0 ? 10 : 0 })
                     .setMouseInteractions(false)
                 var axisX = chart.getDefaultAxisX()
                     .setInterval(0, ${pointCount})
@@ -338,7 +305,7 @@ var ScrollingPointLine = function (pointCount, seriesCount, title) {
                     columnSpan:1, 
                     rowSpan: 1
                 })
-                    .setPadding({ bottom: 0, top: 0 })
+                    .setPadding({ bottom: i < ${seriesCount - 1} ? 10 : 0, top: i > 0 ? 10 : 0 })
                     .setMouseInteractions(false)
                 var axisX = chart.getDefaultAxisX()
                     .setInterval(${-pointCount / 5}, 0)
@@ -370,7 +337,7 @@ var ScrollingPointLine = function (pointCount, seriesCount, title) {
                 series: series
             }
         }`,
-        StreamData(true)
+        StreamData(pointCount, true)
     )
 }
 /** 
@@ -399,7 +366,7 @@ var SplineSeries = function (pointCount, seriesCount, title) {
                     columnSpan:1, 
                     rowSpan: 1
                 })
-                    .setPadding({ bottom: 0, top: 0 })
+                    .setPadding({ bottom: i < ${seriesCount - 1} ? 10 : 0, top: i > 0 ? 10 : 0 })
                     .setMouseInteractions(false)
                 var axisX = chart.getDefaultAxisX()
                     .setInterval(${-pointCount / 5}, 0)
@@ -433,7 +400,7 @@ var SplineSeries = function (pointCount, seriesCount, title) {
                 series: series
             }
         }`,
-        StreamData(false)
+        StreamData(pointCount, false)
     )
 }
 /**
@@ -462,7 +429,7 @@ var ScrollingProgressiveArea = function (pointCount, seriesCount, title) {
                     columnSpan:1, 
                     rowSpan: 1
                 })
-                    .setPadding({ bottom: 0, top: 0 })
+                    .setPadding({ bottom: i < ${seriesCount - 1} ? 10 : 0, top: i > 0 ? 10 : 0 })
                     .setMouseInteractions(false)
                 var axisX = chart.getDefaultAxisX()
                     .setInterval(${-pointCount / 5}, 0)
@@ -494,13 +461,13 @@ var ScrollingProgressiveArea = function (pointCount, seriesCount, title) {
                 series: series
             }
         }`,
-        StreamData(true)
+        StreamData(pointCount, true)
     )
 }
 /**
  * Template factory for OHLC series perf test.
  */
-var OHLCSeries = function (pointCount, generator, ohlcSeriesType, ohlcFigureType, title) {
+var OHLCSeries = function (pointCount, generator, ohlcSeriesType, ohlcFigureType, title, autoFitting=true) {
     return ProtoTestCode(
         `function() {
             var lightningChart = require('lcjs').lightningChart
@@ -527,6 +494,7 @@ var OHLCSeries = function (pointCount, generator, ohlcSeriesType, ohlcFigureType
                     positiveFigure : OHLCFigures['${ohlcFigureType}'],
                     seriesConstructor : OHLCSeriesTypes['${ohlcSeriesType}']
                 })
+                    .setFigureAutoFitting(${autoFitting})
             ]
             for (var i = 0; i < series.length; i++){
                 var s = series[i]
@@ -549,7 +517,7 @@ var OHLCSeries = function (pointCount, generator, ohlcSeriesType, ohlcFigureType
                 series: series
             }
         }`,
-        StreamData()
+        StreamData(pointCount)
     )
 }
 var OHLCSeriesFit = function (pointCount, generator, ohlcSeriesType, ohlcFigureType, title) {
@@ -631,9 +599,8 @@ var OHLCSeriesFit = function (pointCount, generator, ohlcSeriesType, ohlcFigureT
 
 // Create test content (XY).
 var xy = Group({
-    key: 'xy',
-    label: 'XY',
-    defaultCollapsed: true
+    key: 'XY',
+    label: 'XY'
 })
 
 // ----- Scatter Series -----
@@ -660,16 +627,15 @@ var addScatterSeries = (pointSize) =>
         .Test({
             key: '50k',
             label: '50 k points',
-            code: ScatterSeries(1000 * 50, pointSize, `Scatter Series 50 000 points ${pointSize}px ${scatterSeriesChunks} sets`),
-            defaultSelected: false
+            code: ScatterSeries(1000 * 50, pointSize, `Scatter Series 50 000 points ${pointSize}px ${scatterSeriesChunks} sets`)
         })
         .Test({
+            defaultSelected: pointSize === 1,
             key: '100k',
             label: '100 k points',
-            code: ScatterSeries(1000 * 100, pointSize, `Scatter Series 100 000 points ${pointSize}px ${scatterSeriesChunks} sets`),
-            defaultSelected: false
+            code: ScatterSeries(1000 * 100, pointSize, `Scatter Series 100 000 points ${pointSize}px ${scatterSeriesChunks} sets`)
         });
-[1, 7].map(addScatterSeries)
+[1, 3].map(addScatterSeries)
 //#endregion
 
 // ----- Scrolling Line Series -----
@@ -681,8 +647,7 @@ var scrollingLineSeries = xy.Group({
 var addScrollingLineSeries = (seriesCount, defaultSelected, excludeAmount = 0) => {
     var group = scrollingLineSeries.Group({
         key: `${seriesCount}xSeries`,
-        label: `${seriesCount} Series`,
-        defaultSelected
+        label: `${seriesCount} Series`
     })
     var thicknessList = [{
         key: 'thin',
@@ -692,7 +657,7 @@ var addScrollingLineSeries = (seriesCount, defaultSelected, excludeAmount = 0) =
     {
         key: 'thick',
         label: 'Thick line',
-        thickness: 4
+        thickness: 3
     }
     ]
     var paramsList = [{
@@ -711,6 +676,11 @@ var addScrollingLineSeries = (seriesCount, defaultSelected, excludeAmount = 0) =
         code: (thickness) => ScrollingProgressiveLine(1000 * 100, seriesCount, thickness.thickness, `${seriesCount} Scrolling Line Series 100 000 points each ${thickness.label}`)
     },
     {
+        key: '250k',
+        label: '250 k points',
+        code: (thickness) => ScrollingProgressiveLine(1000 * 250, seriesCount, thickness.thickness, `${seriesCount} Scrolling Line Series 250 000 points each ${thickness.label}`)
+    },
+    {
         key: '1M',
         label: '1 M points',
         code: (thickness) => ScrollingProgressiveLine(1000 * 1000, seriesCount, thickness.thickness, `${seriesCount} Scrolling Line Series 1 000 000 points each ${thickness.label}`)
@@ -718,24 +688,23 @@ var addScrollingLineSeries = (seriesCount, defaultSelected, excludeAmount = 0) =
     {
         key: '10M',
         label: '10 M points',
-        code: (thickness) => ScrollingProgressiveLine(10 * 1000 * 1000, seriesCount, thickness.thickness, `${seriesCount} Scrolling Line Series 10 000 000 points each ${thickness.label}`),
-        defaultSelected: false
+        code: (thickness) => ScrollingProgressiveLine(10 * 1000 * 1000, seriesCount, thickness.thickness, `${seriesCount} Scrolling Line Series 10 000 000 points each ${thickness.label}`)
     }
     ]
     for (let thicknessParams of thicknessList) {
         var thicknessGroup = group.Group(thicknessParams)
         for (let i = 0; i < paramsList.length - excludeAmount; i++)
             thicknessGroup.Test({
+                defaultSelected: paramsList[i].key === '250k' && thicknessParams.thickness === 1 && seriesCount === 3,
                 key: paramsList[i].key,
                 label: paramsList[i].label,
-                code: paramsList[i].code(thicknessParams),
-                defaultSelected: paramsList[i].defaultSelected
+                code: paramsList[i].code(thicknessParams)
             })
     }
 }
 addScrollingLineSeries(1, true)
+addScrollingLineSeries(3, false, 1)
 addScrollingLineSeries(5, false, 1)
-addScrollingLineSeries(10, false, 1)
 
 //#endregion
 
@@ -748,8 +717,7 @@ var staticLineSeries = xy.Group({
 var addStaticLineSeries = (seriesCount, defaultSelected, excludeAmount = 0) => {
     var group = staticLineSeries.Group({
         key: `${seriesCount}xSeries`,
-        label: `${seriesCount} Series`,
-        defaultSelected
+        label: `${seriesCount} Series`
     })
     var thicknessList = [{
         key: 'thin',
@@ -785,8 +753,7 @@ var addStaticLineSeries = (seriesCount, defaultSelected, excludeAmount = 0) => {
     {
         key: '10M',
         label: '10 M points',
-        code: (thickness) => StaticProgressiveLine(10 * 1000 * 1000, seriesCount, thickness.thickness, `${seriesCount} Static Line Series 10 000 000 points each ${thickness.label}`),
-        defaultSelected: false
+        code: (thickness) => StaticProgressiveLine(10 * 1000 * 1000, seriesCount, thickness.thickness, `${seriesCount} Static Line Series 10 000 000 points each ${thickness.label}`)
     }
     ]
     for (let thicknessParams of thicknessList) {
@@ -795,15 +762,14 @@ var addStaticLineSeries = (seriesCount, defaultSelected, excludeAmount = 0) => {
             thicknessGroup.Test({
                 key: paramsList[i].key,
                 label: paramsList[i].label,
-                code: paramsList[i].code(thicknessParams),
-                defaultSelected: paramsList[i].defaultSelected
+                code: paramsList[i].code(thicknessParams)
             })
     }
 }
 addStaticLineSeries(1, true)
 // Exclude 10 M test for multiple series.
+addStaticLineSeries(3, false, 1)
 addStaticLineSeries(5, false, 1)
-addStaticLineSeries(10, false, 1)
 
 //#endregion
 
@@ -816,8 +782,7 @@ var scrollingAreaSeries = xy.Group({
 var addScrollingAreaSeries = (seriesCount, defaultSelected, excludeAmount = 0) => {
     var group = scrollingAreaSeries.Group({
         key: `${seriesCount}xSeries`,
-        label: `${seriesCount} Series`,
-        defaultSelected
+        label: `${seriesCount} Series`
     })
     var paramsList = [{
         key: '1k',
@@ -830,6 +795,12 @@ var addScrollingAreaSeries = (seriesCount, defaultSelected, excludeAmount = 0) =
         code: ScrollingProgressiveArea(1000 * 10, seriesCount, `${seriesCount} Scrolling Area Series 10 000 points each`)
     },
     {
+        defaultSelected: seriesCount === 1,
+        key: '50k',
+        label: '50 k points',
+        code: ScrollingProgressiveArea(1000 * 50, seriesCount, `${seriesCount} Scrolling Area Series 50 000 points each`)
+    },
+    {
         key: '100k',
         label: '100 k points',
         code: ScrollingProgressiveArea(1000 * 100, seriesCount, `${seriesCount} Scrolling Area Series 100 000 points each`)
@@ -837,8 +808,7 @@ var addScrollingAreaSeries = (seriesCount, defaultSelected, excludeAmount = 0) =
     {
         key: '1M',
         label: '1 M points',
-        code: ScrollingProgressiveArea(1000 * 1000, seriesCount, `${seriesCount} Scrolling Area Series 1 000 000 points each`),
-        defaultSelected: false
+        code: ScrollingProgressiveArea(1000 * 1000, seriesCount, `${seriesCount} Scrolling Area Series 1 000 000 points each`)
     }
     ]
     for (let i = 0; i < paramsList.length - excludeAmount; i++)
@@ -846,7 +816,7 @@ var addScrollingAreaSeries = (seriesCount, defaultSelected, excludeAmount = 0) =
 }
 addScrollingAreaSeries(1)
 // Exclude 1 M test for multiple series.
-addScrollingAreaSeries(5, false, 1)
+addScrollingAreaSeries(3, false, 1)
 
 //#endregion
 
@@ -859,8 +829,7 @@ var scrollingPointLineSeries = xy.Group({
 var addScrollingPointLineSeries = (seriesCount, defaultSelected, excludeAmount = 0) => {
     var group = scrollingPointLineSeries.Group({
         key: `${seriesCount}xSeries`,
-        label: `${seriesCount} Series`,
-        defaultSelected
+        label: `${seriesCount} Series`
     })
     var paramsList = [{
         key: '1k',
@@ -880,8 +849,7 @@ var addScrollingPointLineSeries = (seriesCount, defaultSelected, excludeAmount =
     {
         key: '1M',
         label: '1 M points',
-        code: ScrollingPointLine(1000 * 1000, seriesCount, `${seriesCount} Scrolling Point Line Series 1 000 000 points each`),
-        defaultSelected: false
+        code: ScrollingPointLine(1000 * 1000, seriesCount, `${seriesCount} Scrolling Point Line Series 1 000 000 points each`)
     }
     ]
     for (let i = 0; i < paramsList.length - excludeAmount; i++)
@@ -903,10 +871,10 @@ var splineSeries = xy.Group({
 var addSplineSeries = (seriesCount, defaultSelected, excludeAmount = 0) => {
     var group = splineSeries.Group({
         key: `${seriesCount}xSeries`,
-        label: `${seriesCount} Series`,
-        defaultSelected
+        label: `${seriesCount} Series`
     })
     var paramsList = [{
+        defaultSelected: seriesCount > 1,
         key: '100',
         label: '100 points',
         code: SplineSeries(100, seriesCount, `${seriesCount} Spline Series 100 points each`)
@@ -919,15 +887,14 @@ var addSplineSeries = (seriesCount, defaultSelected, excludeAmount = 0) => {
     {
         key: '10k',
         label: '10 k points',
-        code: SplineSeries(1000 * 10, seriesCount, `${seriesCount} Spline Series 10 000 points each`),
-        defaultSelected: false
+        code: SplineSeries(1000 * 10, seriesCount, `${seriesCount} Spline Series 10 000 points each`)
     }
     ]
     for (let i = 0; i < paramsList.length - excludeAmount; i++)
         group.Test(paramsList[i])
 }
 addSplineSeries(1, true)
-addSplineSeries(5, false)
+addSplineSeries(3, false)
 
 //#endregion
 
@@ -954,29 +921,32 @@ createOHLCSeriesTests(
         .Test({
             key: '100',
             label: '100 records',
-            code: OHLCSeries(100, GenerateOHLC, 'Normal', figureType, `OHLC Series ${figureType} 100 records`)
+            code: OHLCSeries(100, GenerateOHLC, 'Normal', figureType, `OHLC Series ${figureType} 100 records`, false)
         })
         .Test({
             key: '1k',
             label: '1 k records',
-            code: OHLCSeries(1000, GenerateOHLC, 'Normal', figureType, `OHLC Series ${figureType} 1 000 records`)
+            code: OHLCSeries(1000, GenerateOHLC, 'Normal', figureType, `OHLC Series ${figureType} 1 000 records`, false)
         })
         .Test({
-            key: '10k',
-            label: '10 k records',
-            code: OHLCSeries(1000 * 10, GenerateOHLC, 'Normal', figureType, `OHLC Series ${figureType} 10 000 records`)
+            key: '10k fitted',
+            label: '10 k records (fitted)',
+            code: OHLCSeries(1000 * 10, GenerateOHLC, 'Normal', figureType, `OHLC Series ${figureType} 10 000 records`, true)
         })
         .Test({
-            key: '100k',
-            label: '100 k records',
-            code: OHLCSeries(1000 * 100, GenerateOHLC, 'Normal', figureType, `OHLC Series ${figureType} 100 000 records`),
-            defaultSelected: false
+            key: '100k fitted',
+            label: '100 k records (fitted)',
+            code: OHLCSeries(1000 * 100, GenerateOHLC, 'Normal', figureType, `OHLC Series ${figureType} 100 000 records`, true)
         })
         .Test({
-            key: '1M',
-            label: '1 M records',
-            code: OHLCSeries(1000 * 1000, GenerateOHLC, 'Normal', figureType, `OHLC Series ${figureType} 1 000 000 records`),
-            defaultSelected: false
+            key: '500k fitted',
+            label: '500 k records (fitted)',
+            code: OHLCSeries(1000 * 500, GenerateOHLC, 'Normal', figureType, `OHLC Series ${figureType} 500 000 records`, true)
+        })
+        .Test({
+            key: '1M fitted',
+            label: '1 M records (fitted)',
+            code: OHLCSeries(1000 * 1000, GenerateOHLC, 'Normal', figureType, `OHLC Series ${figureType} 1 000 000 records`, true)
         })
 )
 createOHLCSeriesTests(
@@ -988,34 +958,38 @@ createOHLCSeriesTests(
         .Test({
             key: '100',
             label: '100 points',
-            code: OHLCSeries(100, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 100 points`)
+            code: OHLCSeries(100, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 100 points`, false)
         })
         .Test({
             key: '1k',
             label: '1 k points',
-            code: OHLCSeries(1000, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 1 000 points`)
+            code: OHLCSeries(1000, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 1 000 points`, false)
         })
         .Test({
             key: '10k',
             label: '10 k points',
-            code: OHLCSeries(1000 * 10, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 10 000 points`)
+            code: OHLCSeries(1000 * 10, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 10 000 points`, true)
         })
         .Test({
             key: '100k',
             label: '100 k points',
-            code: OHLCSeries(1000 * 100, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 100 000 points`)
+            code: OHLCSeries(1000 * 100, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 100 000 points`, true)
         })
         .Test({
+            key: '500k',
+            label: '500 k points',
+            code: OHLCSeries(1000 * 500, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 500 000 points`, true)
+        })
+        .Test({
+            defaultSelected: true,
             key: '1M',
             label: '1 M points',
-            code: OHLCSeries(1000 * 1000, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 1 000 000 points`),
-            defaultSelected: false
+            code: OHLCSeries(1000 * 1000, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 1 000 000 points`, true)
         })
         .Test({
             key: '10M',
             label: '10 M points',
-            code: OHLCSeries(10 * 1000 * 1000, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 10 000 000 points`),
-            defaultSelected: false
+            code: OHLCSeries(10 * 1000 * 1000, GenerateProgressiveTrace, 'AutomaticPacking', figureType, `OHLC Series XY-input ${figureType} 10 000 000 points`, true)
         })
 )
 createOHLCSeriesTests(
@@ -1027,29 +1001,27 @@ createOHLCSeriesTests(
         .Test({
             key: '100',
             label: '100 records',
-            code: OHLCSeriesFit(100, GenerateOHLC, 'Normal', figureType, `OHLC Series Fit-data ${figureType} 100 records`)
+            code: OHLCSeriesFit(100, GenerateOHLC, 'Normal', figureType, `OHLC Series Fit-data ${figureType} 100 records`, false)
         })
         .Test({
             key: '1k',
             label: '1 k records',
-            code: OHLCSeriesFit(1000, GenerateOHLC, 'Normal', figureType, `OHLC Series Fit-data ${figureType} 1 000 records`)
+            code: OHLCSeriesFit(1000, GenerateOHLC, 'Normal', figureType, `OHLC Series Fit-data ${figureType} 1 000 records`, false)
         })
         .Test({
-            key: '10k',
-            label: '10 k records',
-            code: OHLCSeriesFit(1000 * 10, GenerateOHLC, 'Normal', figureType, `OHLC Series Fit-data ${figureType} 10 000 records`)
+            key: '10k fitted',
+            label: '10 k records (fitted)',
+            code: OHLCSeriesFit(1000 * 10, GenerateOHLC, 'Normal', figureType, `OHLC Series Fit-data ${figureType} 10 000 records`, true)
         })
         .Test({
-            key: '100k',
-            label: '100 k records',
-            code: OHLCSeriesFit(1000 * 100, GenerateOHLC, 'Normal', figureType, `OHLC Series Fit-data ${figureType} 100 000 records`),
-            defaultSelected: false
+            key: '100k fitted',
+            label: '100 k records (fitted)',
+            code: OHLCSeriesFit(1000 * 100, GenerateOHLC, 'Normal', figureType, `OHLC Series Fit-data ${figureType} 100 000 records`, true)
         })
         .Test({
-            key: '1M',
-            label: '1 M records',
-            code: OHLCSeriesFit(1000 * 1000, GenerateOHLC, 'Normal', figureType, `OHLC Series Fit-data ${figureType} 1 000 000 records`),
-            defaultSelected: false
+            key: '1M fitted',
+            label: '1 M records (fitted)',
+            code: OHLCSeriesFit(1000 * 1000, GenerateOHLC, 'Normal', figureType, `OHLC Series Fit-data ${figureType} 1 000 000 records`, true)
         })
 )
 //#endregion
@@ -1238,12 +1210,13 @@ var Dashboard = function (numberOfRows, numberOfColumns, moveSplitters, title) {
         }`
     )
 }
-var dashboard = Group({
+var tests3D = Group({
     key: 'dashboard',
     label: 'Dashboard'
 })
-dashboard
+tests3D
     .Test({
+        defaultSelected: true,
         key: '2x2',
         label: '2x2',
         code: Dashboard(2, 2, true, `Resizing Dashboard 2x2`)

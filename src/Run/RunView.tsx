@@ -169,7 +169,7 @@ export default class RunView extends React.PureComponent<RunViewProps, RunViewSt
         const columnWhiteList = activeTest ? runningColumnWhiteList : undefined
 
         return <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'row' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', minWidth: activeTest ? '250px' : 'calc(50vw)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', minWidth: activeTest ? '250px' : 'calc(50vw)', marginRight: '10px' }}>
                 <div className='TestRunHeader'>
                     <p className='DescriptionTitle'>
                         {
@@ -223,7 +223,9 @@ export default class RunView extends React.PureComponent<RunViewProps, RunViewSt
                 />
             }
             {
-                !activeTest && <MeasurementLegend />
+                !activeTest && <MeasurementLegend
+                    style={{ padding: '4px 8px', marginTop: '100px' }}
+                ></MeasurementLegend>
             }
         </div>
     }

@@ -14,6 +14,8 @@ interface TestSelectorProps {
      * TODO: Comments
      */
     onRun: ( selectedTests: OrderedSet<Test>, testDuration: number, repeatCount: number ) => void
+
+    autoStart: boolean
 }
 interface TestSelectorState {
     /**
@@ -79,6 +81,8 @@ const mapTestListRecursively = <T extends any>(
  * TODO: Comments
  */
 export default class TestSelector extends React.PureComponent<TestSelectorProps, TestSelectorState> {
+    onUnmount: Array<() => unknown> = []
+    
     constructor( props: TestSelectorProps ) {
         super( props )
         // Map initial state from TestItems.
@@ -105,24 +109,32 @@ export default class TestSelector extends React.PureComponent<TestSelectorProps,
             repeatCountSelectionIndex: 2,
             selections,
             collapsions,
-            autoStartIn: 5
+            autoStartIn: this.props.autoStart ? 5 : undefined
         }
     }
     componentDidMount() {
-        const tStart = Date.now()
-        const updateAutoStartCounter = () => {
-            if ( this.state.autoStartIn === undefined || this.state.autoStartIn === 0 ) return
-            const autoStartIn = Math.ceil(5 - (Date.now() - tStart) / 1000)
-            if (autoStartIn !== this.state.autoStartIn) {
-                this.setState({ autoStartIn })
-                if (autoStartIn === 0) {
-                    // Auto-start default tests.
-                    this.onClickRun()
+        if (this.props.autoStart) {
+            let handle: number | undefined
+            const tStart = Date.now()
+            const updateAutoStartCounter = () => {
+                if ( this.state.autoStartIn === undefined || this.state.autoStartIn === 0 ) return
+                const autoStartIn = Math.ceil(5 - (Date.now() - tStart) / 1000)
+                if (autoStartIn !== this.state.autoStartIn) {
+                    this.setState({ autoStartIn })
+                    if (autoStartIn === 0) {
+                        // Auto-start default tests.
+                        this.onClickRun()
+                    }
                 }
+                handle = requestAnimationFrame(updateAutoStartCounter)
             }
-            requestAnimationFrame(updateAutoStartCounter)
+            handle = requestAnimationFrame(updateAutoStartCounter)
+            this.onUnmount.push(() => handle && cancelAnimationFrame(handle))
         }
-        requestAnimationFrame(updateAutoStartCounter)
+    }
+    componentWillUnmount() {
+        this.onUnmount.forEach((clbk) => clbk())
+        this.onUnmount.length = 0
     }
     setItemSelected = ( item: TestItem, selected: boolean, selections: OrderedMap<TestItem, boolean> ) => {
         // Toggle item selection.

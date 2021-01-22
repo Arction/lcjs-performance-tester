@@ -16,6 +16,8 @@ export interface SelectTestsViewProps {
      * TODO: Comments
      */
     onRun: ( selectedTests: OrderedSet<Test>, testDuration: number, repeatCount: number ) => void
+
+    autoStart: boolean
 }
 /**
  * TODO: Comments
@@ -65,6 +67,7 @@ export default class SelectTestsView extends React.PureComponent<SelectTestsView
                 <TestSelector
                     tests={tests}
                     onRun={onRun}
+                    autoStart={this.props.autoStart}
                 />
             </div>
         </div>

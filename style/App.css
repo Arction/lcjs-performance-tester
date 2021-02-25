@@ -81,7 +81,7 @@ ul {
 }
 
 .App {
-  height: calc(100vh - 64px);
+  height: calc(100vh - 160px);
   background-color: #202020;
   border: none;
   position: relative;

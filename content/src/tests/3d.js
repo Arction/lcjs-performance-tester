@@ -266,7 +266,7 @@ var locateChart3D = function (conf) {
 
             chart.getDefaultAxisX().setInterval(0, ${dataResolution}, false, true)
             chart.getDefaultAxisY().setInterval(0, 80, false, true)
-            chart.getDefaultAxisZ().setInterval(-${dataResolution}, 0, false, true)
+            chart.getDefaultAxisZ().setInterval(0, ${dataResolution}, false, true)
 
             var lut = new LUT( {
                 steps: [

@@ -151,8 +151,8 @@ var locatePolarChart = function (conf) {
             for (var channelsCount of groupInfo.channelCounts) {
                 for (var pointsPerCh of groupInfo.pointsPerCh) {
                     group.Test({
-                        key: `${channelsCount} series, ${pointsPerCh} points per series`,
-                        label: `${channelsCount} series, ${pointsPerCh} points per series`,
+                        key: `${channelsCount} series ${pointsPerCh} points per series`,
+                        label: `${channelsCount} series ${pointsPerCh} points per series`,
                         defaultSelected: groupInfo.defaultSelected({ channelsCount, pointsPerCh }),
                         code: ProtoTestCode(
                             locatePolarChart({ title: `${groupInfo.featureName} ${channelsCount} series, ${pointsPerCh} points per series` }),

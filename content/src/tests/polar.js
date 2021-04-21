@@ -19,17 +19,17 @@ var locatePolarChart = function (conf) {
     }`
 }
 
-// ----- Shared test suite for following Polar series types: -----
-// - Polar Point Series
-// - Polar Line Series
-// - Polar Point & Line Series
-// - Polar Area Series (interior)
-// #region
+    // ----- Shared test suite for following Polar series types: -----
+    // - Polar Point Series
+    // - Polar Line Series
+    // - Polar Point & Line Series
+    // - Polar Area Series (interior)
+    // #region
 
-;(function () {
+    ; (function () {
 
-    var generatePolarData = function (channelsCount, pointsPerCh) {
-        return `function () {
+        var generatePolarData = function (channelsCount, pointsPerCh) {
+            return `function () {
             return new Promise(function (resolve, reject) {
                 const timeDomainDepth = 10
                 const angleStep = 360 / ${pointsPerCh}
@@ -50,64 +50,65 @@ var locatePolarChart = function (conf) {
                 resolve(dataSets)
             })
         }`
-    }
+        }
 
-    var groupsInfo = [
-        {
-            key: 'polarLineSeries',
-            label: 'Polar Line Series',
-            featureName: 'Polar Line Series',
-            channelCounts: [
-                1,
-                5,
-                10,
-            ],
-            pointsPerCh: [
-                360,
-                3600
-            ],
-            defaultSelected: () => true,
-            initSeries: `function (iCh, channelsCount) {
+        var groupsInfo = [
+            {
+                key: 'polarLineSeries',
+                label: 'Polar Line Series',
+                featureName: 'Polar Line Series',
+                channelCounts: [
+                    1,
+                    5,
+                    10,
+                ],
+                pointsPerCh: [
+                    360,
+                    3600
+                ],
+                defaultSelected: ({ channelsCount, pointsPerCh }) => false,
+                initSeries: `function (iCh, channelsCount) {
                 var { SolidLine, SolidFill, ColorHSV } = require('lcjs')
                 return chart.addLineSeries()
                     .setStrokeStyle(new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHSV( 360 * iCh / channelsCount ) }) }))
+                    .setConnectDataAutomaticallyEnabled(true)
             }`
-        },
-        {
-            key: 'polarPointSeries',
-            label: 'Polar Point Series',
-            featureName: 'Polar Point Series',
-            channelCounts: [
-                1,
-                5,
-                10,
-            ],
-            pointsPerCh: [
-                360,
-                3600
-            ],
-            defaultSelected: () => false,
-            initSeries: `function (iCh, channelsCount) {
+            },
+            {
+                key: 'polarPointSeries',
+                label: 'Polar Point Series',
+                featureName: 'Polar Point Series',
+                channelCounts: [
+                    1,
+                    5,
+                    10,
+                ],
+                pointsPerCh: [
+                    360,
+                    3600
+                ],
+                defaultSelected: ({ channelsCount, pointsPerCh }) => false,
+                initSeries: `function (iCh, channelsCount) {
                 var { SolidFill, ColorHSV } = require('lcjs')
                 return chart.addPointSeries()
                     .setPointFillStyle(new SolidFill({ color: ColorHSV( 360 * iCh / channelsCount ) }))
             }`
-        },
-        {
-            key: 'polarPointLineSeries',
-            label: 'Polar Point Line Series',
-            featureName: 'Polar Point Line Series',
-            channelCounts: [
-                1,
-                5,
-                10,
-            ],
-            pointsPerCh: [
-                360,
-                3600
-            ],
-            defaultSelected: () => true,
-            initSeries: `function (iCh, channelsCount) {
+            },
+            {
+                key: 'polarPointLineSeries',
+                label: 'Polar Point Line Series',
+                featureName: 'Polar Point Line Series',
+                channelCounts: [
+                    1,
+                    5,
+                    10,
+                ],
+                pointsPerCh: [
+                    360,
+                    3600
+                ],
+                defaultSelected: ({ channelsCount, pointsPerCh }) => false,
+                initSeries: `function (iCh, channelsCount) {
                 var { SolidLine, SolidFill, ColorHSV, ColorHEX } = require('lcjs')
                 return chart.addPointLineSeries()
                     .setStrokeStyle(new SolidLine({
@@ -117,43 +118,46 @@ var locatePolarChart = function (conf) {
                         })
                     }))
                     .setPointFillStyle(new SolidFill({ color: ColorHEX('#fff') }))
+                    .setConnectDataAutomaticallyEnabled(true)
             }`
-        },
-        {
-            key: 'polarAreaSeries',
-            label: 'Polar Area Series',
-            featureName: 'Polar Area Series',
-            channelCounts: [
-                1,
-                5,
-                10,
-            ],
-            pointsPerCh: [
-                360,
-                3600
-            ],
-            defaultSelected: () => true,
-            initSeries: `function (iCh, channelsCount) {
+            },
+            {
+                key: 'polarAreaSeries',
+                label: 'Polar Area Series',
+                featureName: 'Polar Area Series',
+                channelCounts: [
+                    1,
+                    5,
+                    10,
+                ],
+                pointsPerCh: [
+                    360,
+                    3600
+                ],
+                defaultSelected: ({ channelsCount, pointsPerCh }) => channelsCount === 5 && pointsPerCh === 360,
+                initSeries: `function (iCh, channelsCount) {
                 var { SolidLine, SolidFill, ColorHSV, emptyLine } = require('lcjs')
                 return chart.addAreaSeries()
                     .setFillStyle(new SolidFill({ color: ColorHSV( 360 * iCh / channelsCount ).setA(100) }))
                     .setStrokeStyle(emptyLine)
+                    .setConnectDataAutomaticallyEnabled(true)
             }`
-        }
-    ]
-    
-    for (var groupInfo of groupsInfo) {
-        var group = testsPolar.Group(groupInfo)
+            }
+        ]
 
-        for (var channelsCount of groupInfo.channelCounts) {
-            for (var pointsPerCh of groupInfo.pointsPerCh) {
-                group.Test({
-                    key: `${channelsCount} series, ${pointsPerCh} points per series`,
-                    label: `${channelsCount} series, ${pointsPerCh} points per series`,
-                    code: ProtoTestCode(
-                        locatePolarChart({ title: `${groupInfo.featureName} ${channelsCount} series, ${pointsPerCh} points per series` }),
-                        generatePolarData(channelsCount, pointsPerCh),
-                        `function (data, chart) {
+        for (var groupInfo of groupsInfo) {
+            var group = testsPolar.Group(groupInfo)
+
+            for (var channelsCount of groupInfo.channelCounts) {
+                for (var pointsPerCh of groupInfo.pointsPerCh) {
+                    group.Test({
+                        key: `${channelsCount} series, ${pointsPerCh} points per series`,
+                        label: `${channelsCount} series, ${pointsPerCh} points per series`,
+                        defaultSelected: groupInfo.defaultSelected({ channelsCount, pointsPerCh }),
+                        code: ProtoTestCode(
+                            locatePolarChart({ title: `${groupInfo.featureName} ${channelsCount} series, ${pointsPerCh} points per series` }),
+                            generatePolarData(channelsCount, pointsPerCh),
+                            `function (data, chart) {
                             var channelsSeries = new Array(${channelsCount}).fill(undefined).map((_, iCh) => {
                                 return (${groupInfo.initSeries})(iCh, ${channelsCount})
                             })
@@ -162,7 +166,7 @@ var locatePolarChart = function (conf) {
                                 channelsSeries
                             }
                         }`,
-                        `function (env) {
+                            `function (env) {
                             var data = env.data
                             var channelsSeries = env.channelsSeries
                             return new Promise(function (resolve, reject) {
@@ -183,11 +187,11 @@ var locatePolarChart = function (conf) {
                                 update()
                             })
                         }`
-                    )
-                })
+                        )
+                    })
+                }
             }
         }
-    }
-})()
+    })()
 
 // #endregion

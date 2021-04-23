@@ -148,7 +148,7 @@ var ScrollingProgressiveLine = function (pointCount, seriesCount, thickness, tit
         GenerateProgressive(pointCount),
         `
         function (data, grid) {
-            var { AxisScrollStrategies, ApplicationFlags, emptyFill, emptyTick, AxisTickStrategies } = require('lcjs')
+            var { AxisScrollStrategies, emptyFill, emptyTick, AxisTickStrategies } = require('lcjs')
             var series = []
             for (var i = 0; i < ${seriesCount}; i ++) {
                 var chart = grid.createChartXY({
@@ -177,12 +177,10 @@ var ScrollingProgressiveLine = function (pointCount, seriesCount, thickness, tit
                     chart.setTitleFillStyle(emptyFill)
                     series.push(
                     chart.addLineSeries({
-                        applicationFlags: [
-                            ApplicationFlags.DataPattern({
-                                pattern: 'ProgressiveX',
-                                regularProgressiveStep: true,
-                            })
-                        ]
+                        dataPattern: {
+                            pattern: 'ProgressiveX',
+                            regularProgressiveStep: true,
+                        }
                     })
                         .setStrokeStyle(function(style){return style.setThickness(${thickness})})
                 )
@@ -218,7 +216,7 @@ var StaticProgressiveLine = function (pointCount, seriesCount, thickness, title)
         GenerateProgressive(pointCount),
         `
         function (data, grid) {
-            var { ApplicationFlags, emptyFill, emptyTick, AxisTickStrategies } = require('lcjs')
+            var { emptyFill, emptyTick, AxisTickStrategies } = require('lcjs')
             var series = []
             for (var i = 0; i < ${seriesCount}; i ++) {
                 var chart = grid.createChartXY({
@@ -246,12 +244,10 @@ var StaticProgressiveLine = function (pointCount, seriesCount, thickness, title)
                 
                 series.push(
                     chart.addLineSeries({
-                        applicationFlags: [
-                            ApplicationFlags.DataPattern({
-                                pattern: 'ProgressiveX',
-                                regularProgressiveStep: true,
-                            })
-                        ]
+                        dataPattern: {
+                            pattern: 'ProgressiveX',
+                            regularProgressiveStep: true,
+                        }
                     })
                         .setStrokeStyle(function(style){return style.setThickness(${thickness})})
                         .add(data)
@@ -1057,7 +1053,7 @@ var Dashboard = function (numberOfRows, numberOfColumns, moveSplitters, title) {
         GenerateProgressiveTrace(100),
         `
         function (data, dashboard) {
-            var { ApplicationFlags, emptyFill } = require('lcjs')
+            var { emptyFill } = require('lcjs')
             var charts = []
             var series = []
             for (var x = 0; x < ${numberOfColumns}; x ++) {
@@ -1072,12 +1068,10 @@ var Dashboard = function (numberOfRows, numberOfColumns, moveSplitters, title) {
                         .setPadding({ bottom: 0, top: 0 })
                         .setMouseInteractions(false)
                     var s =  chart.addLineSeries({
-                        applicationFlags: [
-                            ApplicationFlags.DataPattern({
-                                pattern: 'ProgressiveX',
-                                regularProgressiveStep: true,
-                            })
-                        ]
+                        dataPattern: {
+                            pattern: 'ProgressiveX',
+                            regularProgressiveStep: true,
+                        }
                     })
                         .setStrokeStyle(function(style){return style.setThickness(1)})
                         .add(data)

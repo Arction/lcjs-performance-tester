@@ -92,6 +92,11 @@ ul {
   line-height: normal;
 }
 
+.App > div {
+  width: 100%;
+  height: 100%;
+}
+
 .note {
   font-size: 12px;
   color: #909090;
@@ -123,7 +128,7 @@ ul {
 /* Chart */
 
 .Chart {
-  height: calc(100vh - 64px);
+  height: 100%;
   border: none;
   flex-grow: 1;
   /*position: relative;*/
@@ -299,7 +304,6 @@ ul {
 }
 
 .TestChart {
-  height: calc(100vh - 64px);
   background-color: #202020;
   border: none;
   flex-grow: 1;
